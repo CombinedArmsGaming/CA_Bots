@@ -2,9 +2,17 @@ import os
 import time
 from slackclient import SlackClient
 import subprocess
+import requests
+import json
 
-# starterbot's ID as an environment variable
-BOT_ID = "INSERT_ID_HERE"
+# Instantiate Slackbot
+BOT_ID = "XXXXXXXXXXX"
+slack_client = SlackClient('XXXXXXXXXXX')
+
+headers = { "Authorization":"Bot XXXXXXXXXXX",
+            "User-Agent":"myBotThing (http://some.url, v0.1)",
+            "Content-Type":"application/json", }
+
 
 # constants
 AT_BOT = "<@" + BOT_ID + ">"
@@ -15,10 +23,18 @@ WEBON_COMMAND = "open repo"
 WEBOFF_COMMAND = "close repo"
 BUILD_COMMAND = "build repo"
 UPDATE_COMMAND = "update repo"
+SBUILD_COMMAND = "stealth build"
+SUPDATE_COMMAND = "stealth update"
+DEV_COMMAND = "discordpost"
+THANKS_COMMAND = "thanks"
 
-# instantiate Slack & Twilio clients
-slack_client = SlackClient('INSERT_TOKEN_HERE')
-
+def post_discord(message):
+    payload =  json.dumps ( {"content":str(message)} )
+    r = requests.post('https://discordapp.com/api/channels/XXXXXXXXXXX/messages', headers=headers, data=payload)
+    response = ("Returned error code: " + str(r.status_code))
+    if r.status_code == 200:
+        response = "Posted to Discord"
+    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 def handle_command(command, channel):
     """
@@ -31,44 +47,84 @@ def handle_command(command, channel):
         response = "Eagle Six to Bannon; Give me a SITREP."
     if command.startswith(TEST_COMMAND):
         response = "This is Eagle-Six. What do you need?"
+    if command.startswith(DEV_COMMAND):
+	msg = command.replace("discordpost", " ", 1)
+        post_discord(str(msg))
+	response = ""
     if command.startswith(HELP_COMMAND):
-        response = "This is Eagle-Six. My job is to manage the repository automation service. Type open repo or close repo if you need to open/close public access to the repository, or type build repo or update repo if you need to trigger repository construction. I respond to come in as well so you can check if I'm on station"
+        response = "This is Eagle-Six. My job is to manage the repository automation service. Using discordpost <message> will post a short message to Discord. Type open repo or close repo if you need to open/close public access to the repository, or type build repo or update repo if you need to trigger repository construction. I respond to come in as well so you can check if I'm on station"
     if command.startswith(WEBON_COMMAND):
         response = "This is Eagle-Six. Repositories coming live, out."
-	subprocess.call("service apache2 start", shell=True)
+        subprocess.call("service apache2 start", shell=True)
+        post_discord("@everyone repositories are back up.")
+    if command.startswith(THANKS_COMMAND):
+        response = "This is Eagle-Six. Anything for Bae, over."
+        subprocess.call("service apache2 start", shell=True)
     if command.startswith(WEBOFF_COMMAND):
         response = "This is Eagle-Six. Repositories going dark, out."
-	subprocess.call("service apache2 stop", shell=True)
+        subprocess.call("service apache2 stop", shell=True)
+        post_discord("@everyone repositories have been taken down for update.")
     if command.startswith(BUILD_COMMAND):
+        post_discord("Repositories have been taken down for update.")
         response = "This is Eagle-Six to all units. Building all repositories in succession. Starting Main Repository now, over."
-    	slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
-	print("Building all repositories.")
-	subprocess.call("maingen.sh", shell=True)
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        print("Building all repositories.")
+        subprocess.call("maingen.sh", shell=True)
         response = "This is Eagle-Six. Main Repository Built. Starting WW2 Repository, over. (1/3)"
-    	slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
-	subprocess.call("ww2gen.sh", shell=True)
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        subprocess.call("ww2gen.sh", shell=True)
         response = "This is Eagle-Six. WW2 Repository Built. Starting Test Repository, over. (2/3)"
-    	slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
-	subprocess.call("testgen.sh", shell=True)
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        subprocess.call("testgen.sh", shell=True)
         response = "This is Eagle-Six. Test Repository Built, over. (3/3)"
-    	slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
-	response = "Eagle-Six to @volc and @klima. Repositories built. Eagle-Six out."
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        response = "Eagle-Six to @volc and @klima. Repositories built. Eagle-Six out."
+        post_discord("@everyone repositories have been updated.")
     if command.startswith(UPDATE_COMMAND):
+        post_discord("Repositories have been taken down for update.")
         response = "This is Eagle-Six to all units. Updating all repositories in succession. Starting Main Repository now, over. (0/3)"
-    	slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
-	print("Updating all repositories.")
-	subprocess.call("mainupd.sh", shell=True)
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        print("Updating all repositories.")
+        subprocess.call("mainupd.sh", shell=True)
         response = "This is Eagle-Six. Main Repository Updated. Starting WW2 Repository, over. (1/3)"
-    	slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
-	subprocess.call("ww2upd.sh", shell=True)
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        subprocess.call("ww2upd.sh", shell=True)
         response = "This is Eagle-Six. WW2 Repository Updated. Starting Test Repository, over. (2/3)"
-    	slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
-	subprocess.call("testupd.sh", shell=True)
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        subprocess.call("testupd.sh", shell=True)
         response = "This is Eagle-Six. Test Repository Updated, over. (3/3)"
-    	slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
-	response = "Eagle-Six to @volc and @klima. Repositories updated. Eagle-Six out."
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        response = "Eagle-Six to @volc and @klima. Repositories updated. Eagle-Six out."
+        post_discord("@everyone repositories have been updated.")
+    if command.startswith(SBUILD_COMMAND):
+        response = "This is Eagle-Six to all units. Silently building all repositories in succession. Starting Main Repository now, over."
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        print("Building all repositories.")
+        subprocess.call("maingen.sh", shell=True)
+        response = "This is Eagle-Six. Main Repository Built. Starting WW2 Repository, over. (1/3)"
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        subprocess.call("ww2gen.sh", shell=True)
+        response = "This is Eagle-Six. WW2 Repository Built. Starting Test Repository, over. (2/3)"
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        subprocess.call("testgen.sh", shell=True)
+        response = "This is Eagle-Six. Test Repository Built, over. (3/3)"
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        response = "Eagle-Six to @volc and @klima. Repositories silently built. Eagle-Six out."
+    if command.startswith(SUPDATE_COMMAND):
+        response = "This is Eagle-Six to all units. Silently updating all repositories in succession. Starting Main Repository now, over. (0/3)"
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        print("Updating all repositories.")
+        subprocess.call("mainupd.sh", shell=True)
+        response = "This is Eagle-Six. Main Repository Updated. Starting WW2 Repository, over. (1/3)"
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        subprocess.call("ww2upd.sh", shell=True)
+        response = "This is Eagle-Six. WW2 Repository Updated. Starting Test Repository, over. (2/3)"
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        subprocess.call("testupd.sh", shell=True)
+        response = "This is Eagle-Six. Test Repository Updated, over. (3/3)"
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        response = "Eagle-Six to @volc and @klima. Repositories silently updated. Eagle-Six out."
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
-
 
 def parse_slack_output(slack_rtm_output):
     """
