@@ -16,6 +16,7 @@ headers = { "Authorization":"Bot XXXXXXXXXXX",
 
 # constants
 AT_BOT = "<@" + BOT_ID + ">"
+
 EXAMPLE_COMMAND = "do"
 TEST_COMMAND = "come in"
 HELP_COMMAND = "help"
@@ -25,8 +26,15 @@ BUILD_COMMAND = "build repo"
 UPDATE_COMMAND = "update repo"
 SBUILD_COMMAND = "stealth build"
 SUPDATE_COMMAND = "stealth update"
-DEV_COMMAND = "discordpost"
+DISCORD_COMMAND = "discordpost"
 THANKS_COMMAND = "thanks"
+DEV_COMMAND = "dev"
+MODLINE_COMMAND = "modline"
+response = ""
+
+modline = []
+invline = []
+inputline = []
 
 def post_discord(message):
     payload =  json.dumps ( {"content":str(message)} )
@@ -35,6 +43,8 @@ def post_discord(message):
     if r.status_code == 200:
         response = "Posted to Discord"
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+
+
 
 def handle_command(command, channel):
     """
@@ -48,9 +58,18 @@ def handle_command(command, channel):
     if command.startswith(TEST_COMMAND):
         response = "This is Eagle-Six. What do you need?"
     if command.startswith(DEV_COMMAND):
-	msg = command.replace("discordpost", " ", 1)
+        response = "This is Eagle-Six. Developer command received."
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        invlinegen("main")
+    if command.startswith(DISCORD_COMMAND):
+        msg = command.replace("discordpost", " ", 1)
         post_discord(str(msg))
-	response = ""
+        response = ""
+    if command.startswith(MODLINE_COMMAND):
+        msg = command.replace("modline", "", 1)
+        modcmd = msg.split(" ")
+        modlinemanage(str(modcmd[1]),str(modcmd[2]),str(modcmd[3]))
+        response = ""
     if command.startswith(HELP_COMMAND):
         response = "This is Eagle-Six. My job is to manage the repository automation service. Using discordpost <message> will post a short message to Discord. Type open repo or close repo if you need to open/close public access to the repository, or type build repo or update repo if you need to trigger repository construction. I respond to come in as well so you can check if I'm on station"
     if command.startswith(WEBON_COMMAND):
@@ -126,6 +145,92 @@ def handle_command(command, channel):
         response = "Eagle-Six to @volc and @klima. Repositories silently updated. Eagle-Six out."
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
+def invlinegen(repo):
+    modstring = ""
+    invstring = ""
+    # Sets variables for chosen repository
+    if repo == "main":
+    	repofile = "/repository/storage/mainmodline"
+    	invfile = "/repository/storage/mainignore"
+    if repo == "ww2":
+    	repofile = "/repository/storage/ww2modline"
+    	invfile = "/repository/storage/ww2ignore"
+    if repo == "test":
+    	repofile = "/repository/storage/testmodline"
+    	invfile = "/repository/storage/testignore"
+    if (repo != "main") and (repo != "ww2") and (repo != "test"):
+    	print "this repository was not recognised"
+    	return None
+    # Reads in an alphabetical list of all possible mod folders to be used for generation
+    inputline = [d for d in os.listdir("/repository/input") if os.path.isdir(os.path.join("/repository/input", d))]
+    inputline = sorted(inputline)
+    # Reads in all the mods in the chosen modline and seperates them into a list 
+    with open(repofile, 'r') as f:
+        modstring = f.readline()
+    modline = modstring.split(";")
+    # Generates invline by comparing inputline to modline
+    invline = [item for item in inputline if item not in modline]
+    # Generates invline string from list
+    for mod in invline:
+    	invstring = (invstring + str(mod)+ ";")
+    f = open(invfile, 'w')
+    f.write(invstring)
+    f.close()    
+
+def modlinemanage(operation,mod,repo):
+    if str(repo) == "main":
+    	repofile = "/repository/storage/mainmodline"
+    	invfile = "/repository/storage/mainignore"
+    if str(repo) == "ww2":
+    	repofile = "/repository/storage/ww2modline"
+    	invfile = "/repository/storage/ww2ignore"
+    if str(repo) == "test":
+    	repofile = "/repository/storage/testmodline"
+    	invfile = "/repository/storage/testignore"
+    if (str(repo) != "main") and (str(repo) != "ww2") and (str(repo) != "test"):
+        print "this repo was not recognised"
+        return None
+
+    # Reads in all the mods in the chosen modline and seperates them into a list 
+    with open(repofile, 'r') as f:
+        modstring = f.readline()
+    modline = modstring.split(";")
+
+    if operation == "add":
+        modline.append(mod)
+        modline[:] = [item for item in modline if item]
+        modline = sorted(modline)
+        modstring = ""
+        for mods in modline:
+    	    modstring = (modstring + str(mods)+ ";")
+        f = open(repofile, 'w')
+        f.write(modstring)
+        f.close()
+        invlinegen(str(repo))
+        response = ("Added " + mod + " to " + repo + " modline, over.")
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    if operation == "remove":
+    	gen = [mod]
+        modline = [item for item in modline if item not in gen]
+        modline[:] = [item for item in modline if item]
+        modline = sorted(modline)
+        modstring = ""
+        for mods in modline:
+    	    modstring = (modstring + str(mods)+ ";")
+    	f = open(repofile, 'w')
+        f.write(modstring)
+        f.close()
+        invlinegen(str(repo))
+        response = ("Removed " + mod + " from " + repo + " modline, over.")
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    if operation == "update":
+        invlinegen(str(repo))
+        response = ("Updating " + repo + " modline, over.")
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    if (operation != "add") and (operation != "remove") and (operation != "update"):
+        print "this operation was not recognised"
+        return None
+
 def parse_slack_output(slack_rtm_output):
     """
         The Slack Real Time Messaging API is an events firehose.
@@ -140,7 +245,6 @@ def parse_slack_output(slack_rtm_output):
                 return output['text'].split(AT_BOT)[1].strip().lower(), \
                        output['channel']
     return None, None
-
 
 if __name__ == "__main__":
     READ_WEBSOCKET_DELAY = 1 # 1 second delay between reading from firehose
