@@ -1,0 +1,10 @@
+[ 
+    {
+        "name":"",
+        "slack-token":"",
+        "slack-botid":"",
+        "discord-token":"",
+        "discord-channel":"",
+        "watchfolder":""
+    }
+]
