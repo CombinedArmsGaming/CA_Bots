@@ -195,7 +195,7 @@ def modlinemanage(operation,mod,repo):
     with open(repofile, 'r') as f:
         modstring = f.readline()
     modline = modstring.split(";")
-
+    # IF tree for operation determination
     if operation == "add":
         modline.append(mod)
         modline[:] = [item for item in modline if item]
