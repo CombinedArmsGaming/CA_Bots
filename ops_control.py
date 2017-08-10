@@ -1,3 +1,16 @@
+######  SLACKBOT FOR COMBINED ARMS     ######
+######  DEV: CALUM CAMERON BROOKES     ######
+######  CALUM.C.BROOKES@GMAIL.COM      ######
+######  VERSION 1.0 10/8/2017          ######
+
+"""
+    QUICK GLOSSARY
+    This updater uses a couple of terms that might not be obvious to the untrained user.
+    modfile / modline = list of mods that a client would use to launch Arma 3 in their parameter line
+    invfile / invline = "INVerse modLINE" - list of mods in the generation folder that swifty must ignore
+                        such that the generated repo contains all the mods in the modline
+"""
+
 import os
 import time
 from slackclient import SlackClient
