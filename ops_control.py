@@ -182,7 +182,7 @@ def invlinegen(repo):
     repofile=repochecker(repo)[0]
     invfile=repochecker(repo)[1]
     # Reads in an alphabetical list of all possible mod folders to be used for generation
-    inputline = [d for d in os.listdir("/repository/input") if os.path.isdir(os.path.join("/repository/input", d))]
+    inputline = [d for d in os.listdir(botparams["watchfolder"]) if os.path.isdir(os.path.join(botparams["watchfolder"], d))]
     inputline = sorted(inputline)
     # Reads in all the mods in the chosen modline and seperates them into a list 
     with open(repofile, 'r') as f:
