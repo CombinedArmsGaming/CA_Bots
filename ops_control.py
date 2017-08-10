@@ -91,6 +91,11 @@ def handle_command(command, channel):
         modcmd = msg.split(" ")
         modlinemanage(str(modcmd[1]),str(modcmd[2]),str(modcmd[3]))
         response = ""
+    if command.startswith(CHECK_COMMAND):
+        msg = command.replace("show", "", 1)
+        showcmd = msg.split(" ")
+        showmanage(str(showcmd[1]))
+        response = ""
     if command.startswith(HELP_COMMAND):
         response = "This is Eagle-Six. My job is to manage the repository automation service. Using discordpost <message> will post a short message to Discord. Type open repo or close repo if you need to open/close public access to the repository, or type build repo or update repo if you need to trigger repository construction. I respond to come in as well so you can check if I'm on station"
     if command.startswith(WEBON_COMMAND):
@@ -189,6 +194,23 @@ def filewriter(file,string):
     f.write(string)
     f.close()
 
+def showmanage(repo):
+	# Check which repo file is to be used and sanity checks it.
+    repofile=repochecker(repo)[0]
+    invfile=repochecker(repo)[1]
+    if (repofile == ""):
+        response = ("Parker, Bannon has made a mistake in the above command. Make sure it gets corrected.")
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        return None
+    with open(repofile, 'r') as f:
+        modstring = f.readline()
+    with open(invfile, 'r') as f:
+        invstring = f.readline()
+    response = ("Parker. The " + repo + "repository contains these mods: " + modstring)
+    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    response = ("And Swifty will ignore these mods: " + invstring)
+    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+
 def invlinegen(repo):
     # Prepares variables for use
     modstring = ""
@@ -226,6 +248,8 @@ def modlinemanage(operation,mod,repo):
     	    exist = True
     # Exit if no repo is selected by repochecker, the mod doesn't begin with an @, or the modfolder doesn't exist in the upload folder.
     if (repofile == "") or (exist != True) or (item[0][:1] != "@"):
+        response = ("Parker, Bannon has made a mistake in the above command. Make sure it gets corrected. Perhaps the mod folder hasn't been uploaded or the syntax is wrong.")
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
         return None
 
     # Reads in all the mods in the chosen modline and seperates them into a list 
