@@ -18,42 +18,46 @@ import subprocess
 import requests
 import json
 
-# Loads JSON data into a dictionary from bot configuration file
+# Loads JSON data into dictionaries from bot configuration files
 with open('/python/slackbot/botconfig.json') as data_file:    
     botparams = json.load(data_file)[0]
-
 with open('/python/slackbot/repoconfig.json') as data_file:    
     repoparams = json.load(data_file)
 
 # Instantiate Slackbot
 BOT_ID = botparams["slack-botid"]
 slack_client = SlackClient(botparams["slack-token"])
-
+# Discord HTTP header initialisation
 headers = { "Authorization":botparams["discord-token"],
             "User-Agent":"myBotThing (http://some.url, v0.1)",
             "Content-Type":"application/json", }
 
-# constants
+# Global Variable Pre-Sanitisation
 AT_BOT = "<@" + BOT_ID + ">"
+response = ""
+modline = []
+invline = []
+inputline = []
 
-EXAMPLE_COMMAND = "do"
+###### COMMAND PREFIXES ######
+
+# Commands relating to testing/presence
 TEST_COMMAND = "come in"
 HELP_COMMAND = "help"
+THANKS_COMMAND = "thanks"
+DISCORD_COMMAND = "discordpost"
+# Commands relating to repository generation
 WEBON_COMMAND = "open repo"
 WEBOFF_COMMAND = "close repo"
 BUILD_COMMAND = "build repo"
 UPDATE_COMMAND = "update repo"
 SBUILD_COMMAND = "stealth build"
 SUPDATE_COMMAND = "stealth update"
-DISCORD_COMMAND = "discordpost"
-THANKS_COMMAND = "thanks"
-DEV_COMMAND = "dev"
+# Commands relating to modline generation
 MODLINE_COMMAND = "modline"
-response = ""
-
-modline = []
-invline = []
-inputline = []
+CHECK_COMMAND = "show"
+# Development Command
+DEV_COMMAND = "dev" 
 
 def post_discord(message):
     payload =  json.dumps ( {"content":str(message)} )
@@ -72,8 +76,6 @@ def handle_command(command, channel):
         returns back what it needs for clarification.
     """
     response = "I need more information to allocate additional fire support Parker, try the help command if you need to call for additional support."
-    if command.startswith(EXAMPLE_COMMAND):
-        response = "Eagle Six to Bannon; Give me a SITREP."
     if command.startswith(TEST_COMMAND):
         response = "This is Eagle-Six. What do you need?"
     if command.startswith(DEV_COMMAND):
@@ -214,6 +216,18 @@ def modlinemanage(operation,mod,repo):
     repofile=repochecker(repo)[0]
     invfile=repochecker(repo)[1]
 
+    ### SANITY CHECKS ###
+    inputline = [d for d in os.listdir(botparams["watchfolder"]) if os.path.isdir(os.path.join(botparams["watchfolder"], d))]
+    inputline = sorted(inputline)
+    exist = False
+    item = [mod]
+    for folder in inputline:
+    	if folder == item[0]:
+    	    exist = True
+    # Exit if no repo is selected by repochecker, the mod doesn't begin with an @, or the modfolder doesn't exist in the upload folder.
+    if (repofile == "") or (exist != True) or (item[0][:1] != "@"):
+        return None
+
     # Reads in all the mods in the chosen modline and seperates them into a list 
     with open(repofile, 'r') as f:
         modstring = f.readline()
@@ -221,9 +235,10 @@ def modlinemanage(operation,mod,repo):
 
     # IF tree for operation determination
     if operation == "add":
-        # Appends mod to active list, removes blank entries, and then sorts alphabetically.
+        # Appends mod to active list, removes blank entries, checks for duplicates and then sorts alphabetically.
         modline.append(mod)
         modline[:] = [item for item in modline if item]
+        modline = set(modline)
         modline = sorted(modline)
         # Prepares modstring for use, and generates modstring from list.
         modstring = ""
