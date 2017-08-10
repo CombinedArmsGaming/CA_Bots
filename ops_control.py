@@ -7,7 +7,10 @@ import json
 
 # Loads JSON data into a dictionary from bot configuration file
 with open('/python/slackbot/botconfig.json') as data_file:    
-    botparams = json.load(data_file)[1]
+    botparams = json.load(data_file)[0]
+
+with open('/python/slackbot/repoconfig.json') as data_file:    
+    repoparams = json.load(data_file)
 
 # Instantiate Slackbot
 BOT_ID = botparams["slack-botid"]
@@ -148,22 +151,36 @@ def handle_command(command, channel):
         response = "Eagle-Six to @volc and @klima. Repositories silently updated. Eagle-Six out."
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
+def repochecker(repo):
+    if repo == "main":
+        repofile = repoparams[0]["repofile"]
+        invfile = repoparams[0]["invfile"]
+    if repo == "ww2":
+        repofile = repoparams[1]["repofile"]
+        invfile = repoparams[1]["invfile"]
+    if repo == "test":
+        repofile = repoparams[2]["repofile"]
+        invfile = repoparams[2]["invfile"]
+    if (repo != "main") and (repo != "ww2") and (repo != "test"):
+        print "this repository was not recognised"
+        response = ("Parker, that repository wasn't recognised. Try again, over.")
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        return ["",""]
+    return [repofile,invfile]
+
+def filewriter(file,string):
+    # Simple filewriter that opens the file provided and overwrites the content with the string provided.
+    f = open(file, 'w')
+    f.write(string)
+    f.close()
+
 def invlinegen(repo):
+    # Prepares variables for use
     modstring = ""
     invstring = ""
     # Sets variables for chosen repository
-    if repo == "main":
-    	repofile = "/repository/storage/mainmodline"
-    	invfile = "/repository/storage/mainignore"
-    if repo == "ww2":
-    	repofile = "/repository/storage/ww2modline"
-    	invfile = "/repository/storage/ww2ignore"
-    if repo == "test":
-    	repofile = "/repository/storage/testmodline"
-    	invfile = "/repository/storage/testignore"
-    if (repo != "main") and (repo != "ww2") and (repo != "test"):
-    	print "this repository was not recognised"
-    	return None
+    repofile=repochecker(repo)[0]
+    invfile=repochecker(repo)[1]
     # Reads in an alphabetical list of all possible mod folders to be used for generation
     inputline = [d for d in os.listdir("/repository/input") if os.path.isdir(os.path.join("/repository/input", d))]
     inputline = sorted(inputline)
@@ -176,62 +193,65 @@ def invlinegen(repo):
     # Generates invline string from list
     for mod in invline:
     	invstring = (invstring + str(mod)+ ";")
-    f = open(invfile, 'w')
-    f.write(invstring)
-    f.close()    
+    # Writes invline string to file
+    filewriter(invfile,invstring)    
 
 def modlinemanage(operation,mod,repo):
-    if str(repo) == "main":
-    	repofile = "/repository/storage/mainmodline"
-    	invfile = "/repository/storage/mainignore"
-    if str(repo) == "ww2":
-    	repofile = "/repository/storage/ww2modline"
-    	invfile = "/repository/storage/ww2ignore"
-    if str(repo) == "test":
-    	repofile = "/repository/storage/testmodline"
-    	invfile = "/repository/storage/testignore"
-    if (str(repo) != "main") and (str(repo) != "ww2") and (str(repo) != "test"):
-        print "this repo was not recognised"
-        return None
+    # Sets variables for chosen repository
+    repofile=repochecker(repo)[0]
+    invfile=repochecker(repo)[1]
 
     # Reads in all the mods in the chosen modline and seperates them into a list 
     with open(repofile, 'r') as f:
         modstring = f.readline()
     modline = modstring.split(";")
+
     # IF tree for operation determination
     if operation == "add":
+        # Appends mod to active list, removes blank entries, and then sorts alphabetically.
         modline.append(mod)
         modline[:] = [item for item in modline if item]
         modline = sorted(modline)
+        # Prepares modstring for use, and generates modstring from list.
         modstring = ""
         for mods in modline:
     	    modstring = (modstring + str(mods)+ ";")
-        f = open(repofile, 'w')
-        f.write(modstring)
-        f.close()
+        # Writes modstring to file.
+        filewriter(repofile,modstring)
+        # Generates invline file from newly updated modline.
         invlinegen(str(repo))
+        # ...and tells you what it's done.
         response = ("Added " + mod + " to " + repo + " modline, over.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     if operation == "remove":
-    	gen = [mod]
+        # Generates new modline by regenerating modline and omitting mods that match the one being removed.
+        gen = [mod]
         modline = [item for item in modline if item not in gen]
+        # Removes duplicate mods and sorts alphabetically.
         modline[:] = [item for item in modline if item]
         modline = sorted(modline)
+        # Prepares modstring for use, and generates new modfile string. 
         modstring = ""
         for mods in modline:
     	    modstring = (modstring + str(mods)+ ";")
-    	f = open(repofile, 'w')
-        f.write(modstring)
-        f.close()
+        # Writes modline string to file.
+        filewriter(repofile,modstring)
+        # Generates invline from newly generated modline.
         invlinegen(str(repo))
+        # Then tells everyone it's a clever boy.
         response = ("Removed " + mod + " from " + repo + " modline, over.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     if operation == "update":
+        # Doesn't give a damn, just generates an invline.
         invlinegen(str(repo))
-        response = ("Updating " + repo + " modline, over.")
+        # Tells you it's done it.
+        response = ("Updated " + repo + " modline, over.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     if (operation != "add") and (operation != "remove") and (operation != "update"):
+        # Chastises you for being silly
         print "this operation was not recognised"
+        response = ("Parker, I need to know what to do to the modline. Try telling me to add remove or update the modline.")
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
         return None
 
 def parse_slack_output(slack_rtm_output):
