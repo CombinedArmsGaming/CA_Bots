@@ -5,14 +5,17 @@ import subprocess
 import requests
 import json
 
-# Instantiate Slackbot
-BOT_ID = "XXXXXXXXXXX"
-slack_client = SlackClient('XXXXXXXXXXX')
+# Loads JSON data into a dictionary from bot configuration file
+with open('/python/slackbot/botconfig.json') as data_file:    
+    botparams = json.load(data_file)[1]
 
-headers = { "Authorization":"Bot XXXXXXXXXXX",
+# Instantiate Slackbot
+BOT_ID = botparams["slack-botid"]
+slack_client = SlackClient(botparams["slack-token"])
+
+headers = { "Authorization":botparams["discord-token"],
             "User-Agent":"myBotThing (http://some.url, v0.1)",
             "Content-Type":"application/json", }
-
 
 # constants
 AT_BOT = "<@" + BOT_ID + ">"
@@ -38,7 +41,7 @@ inputline = []
 
 def post_discord(message):
     payload =  json.dumps ( {"content":str(message)} )
-    r = requests.post('https://discordapp.com/api/channels/XXXXXXXXXXX/messages', headers=headers, data=payload)
+    r = requests.post('https://discordapp.com/api/channels/'+botparams["discord-channel"]+'/messages', headers=headers, data=payload)
     response = ("Returned error code: " + str(r.status_code))
     if r.status_code == 200:
         response = "Posted to Discord"
