@@ -123,32 +123,44 @@ def handle_command(command, channel):
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 def post_discord(message):
+	# Load message payload
     payload =  json.dumps ( {"content":str(message)} )
+    # Make HTTP request using header and payload defined earlier.
     r = requests.post('https://discordapp.com/api/channels/'+botparams["discord-channel"]+'/messages', headers=headers, data=payload)
+    # Prepare error message and overwrite it if the request was successful.
     response = ("Returned error code: " + str(r.status_code))
     if r.status_code == 200:
         response = "Posted to Discord"
+    # Tell everyone you've been a good boy
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 def repobuilder(action):
+	# Sanitise action and print beginning message.
     action = str(action)
     print(action+" - all repositories.")
     response = "This is Eagle-Six to all units. Message received, silently "+action+" all repositories in succession. Starting Main Repository now, over. (0/3)"
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    # GENERATE MAIN 
     showmanage("main")
     subprocess.call("repogen.sh main "+action, shell=True)
     confirmationmessage("main","ww2","1",action)
+    # GENERATE WW2
     showmanage("ww2")
     subprocess.call("repogen.sh ww2 "+action, shell=True)
     confirmationmessage("ww2","test","2",action)
+    # GENERATE TEST
     showmanage("test")
     subprocess.call("repogen.sh test "+action, shell=True)
     confirmationmessage("test","fin","3")
+    # Print confirmation message.
     response = "Eagle-Six to @volc and @klima. Repositories "+action+"d. Eagle-Six out."
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 def confirmationmessage(repo,nextrepo,count,action):
+	# swifty repo.srf is created at the end of a successful repo generation. We can test for it's existence after a generation attempt to check success.
+    # Create repo.srf file path identifier
     checkfile = "/var/www/html/"+repo+"/repo.srf"
+    # Check for the repo.srf file, and print the right error message.
     if os.path.isfile(checkfile):
         if (nextrepo != "fin"):
             response = "This is Eagle-Six. "+repo+" repository "+action+"d. Starting "+nextrepo+" Repository, over. ("+str(count)+"/3)"
@@ -158,6 +170,7 @@ def confirmationmessage(repo,nextrepo,count,action):
             response = "This is Eagle-Six. "+repo+" repository "+action+"d. ("+str(count)+"/3)"
             slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
             return None
+    # Print error message if repo.srf doesn't exist.
     response = "There was a problem building "+repo+"repository. @volc should check the console output."
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
@@ -195,10 +208,12 @@ def showmanage(repo):
         response = ("Parker, Bannon has made a mistake in the above command. Make sure it gets corrected.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
         return None
+    # Open files if they exist and load the contents.
     with open(repofile, 'r') as f:
         modstring = f.readline()
     with open(invfile, 'r') as f:
         invstring = f.readline()
+    # Print the contents of the files.
     response = ("Parker. The " + repo + "repository contains these mods: " + modstring)
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     response = ("And Swifty will ignore these mods: " + invstring)
@@ -241,6 +256,7 @@ def modlinemanage(operation,mod,repo):
             exist = True
 
     # Exit if no repo is selected by repochecker, the mod doesn't begin with an @, or the modfolder doesn't exist in the upload folder.
+    # As anything can be used for an update command, ignore the tests for folder existing and beginniner with an @ if the command is to do an update.
     if ((repofile == "") or (exist != True) or (item[0][:1] != "@")) and ((operation != "update") or (repofile == "")):
         response = ("Parker, Bannon has made a mistake in the above command. Make sure it gets corrected. Perhaps the mod folder hasn't been uploaded or the syntax is wrong.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
