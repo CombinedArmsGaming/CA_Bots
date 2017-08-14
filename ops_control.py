@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 1.2 14/8/2017          ######
+######  VERSION 1.3 14/8/2017          ######
 
 """
     QUICK GLOSSARY
@@ -17,6 +17,7 @@ from slackclient import SlackClient
 import subprocess
 import requests
 import json
+import re
 
 # Loads JSON data into dictionaries from bot configuration files
 with open('/python/slackbot/botconfig.json') as data_file:    
@@ -170,6 +171,9 @@ def repochecker(repo):
 
 def filewriter(file,string):
     # Simple filewriter that opens the file provided and overwrites the content with the string provided.
+    # Strip all line breaks. Line breaks are not approved for use in this software.
+    string = re.sub("\n", "", string)
+    # Write string to file.
     f = open(file, 'w')
     f.write(string)
     f.close()
