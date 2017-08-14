@@ -228,11 +228,11 @@ def modlinemanage(operation,mod,repo):
     exist = False
     item = [mod]
     for folder in inputline:
-        if (folder == item[0]) and (operation != "update"):
+        if (folder == item[0]):
             exist = True
 
     # Exit if no repo is selected by repochecker, the mod doesn't begin with an @, or the modfolder doesn't exist in the upload folder.
-    if (repofile == "") or (exist != True) or (item[0][:1] != "@"):
+    if ((repofile == "") or (exist != True) or (item[0][:1] != "@")) and (operation != "update"):
         response = ("Parker, Bannon has made a mistake in the above command. Make sure it gets corrected. Perhaps the mod folder hasn't been uploaded or the syntax is wrong.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
         return None
