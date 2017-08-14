@@ -60,16 +60,6 @@ CHECK_COMMAND = "show"
 # Development Command
 DEV_COMMAND = "dev" 
 
-def post_discord(message):
-    payload =  json.dumps ( {"content":str(message)} )
-    r = requests.post('https://discordapp.com/api/channels/'+botparams["discord-channel"]+'/messages', headers=headers, data=payload)
-    response = ("Returned error code: " + str(r.status_code))
-    if r.status_code == 200:
-        response = "Posted to Discord"
-    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
-
-
-
 def handle_command(command, channel):
     """
         Receives commands directed at the bot and determines if they
@@ -86,6 +76,7 @@ def handle_command(command, channel):
         gencmd = msg.split(" ")
         subprocess.call("repogen.sh "+gencmd[1]+" "+gencmd[2], shell=True)
         response = ""
+        action = str(gencmd[2])
     if command.startswith(DISCORD_COMMAND):
         msg = command.replace("discordpost", " ", 1)
         post_discord(str(msg))
@@ -131,6 +122,14 @@ def handle_command(command, channel):
         response = ""
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
+def post_discord(message):
+    payload =  json.dumps ( {"content":str(message)} )
+    r = requests.post('https://discordapp.com/api/channels/'+botparams["discord-channel"]+'/messages', headers=headers, data=payload)
+    response = ("Returned error code: " + str(r.status_code))
+    if r.status_code == 200:
+        response = "Posted to Discord"
+    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+
 def repobuilder(action):
     action = str(action)
     print(action+" - all repositories.")
@@ -138,19 +137,29 @@ def repobuilder(action):
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     showmanage("main")
     subprocess.call("repogen.sh main "+action, shell=True)
-    response = "This is Eagle-Six. Main Repository "+action+"d. Starting WW2 Repository, over. (1/3)"
-    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    confirmationmessage("main","ww2","1",action)
     showmanage("ww2")
     subprocess.call("repogen.sh ww2 "+action, shell=True)
-    response = "This is Eagle-Six. WW2 Repository "+action+"d. Starting Test Repository, over. (2/3)"
-    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    confirmationmessage("ww2","test","2",action)
     showmanage("test")
     subprocess.call("repogen.sh test "+action, shell=True)
-    response = "This is Eagle-Six. Test Repository "+action+"d, over. (3/3)"
-    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    confirmationmessage("test","fin","3")
     response = "Eagle-Six to @volc and @klima. Repositories "+action+"d. Eagle-Six out."
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
+def confirmationmessage(repo,nextrepo,count,action):
+    checkfile = "/var/www/html/"+repo+"/repo.srf"
+    if os.path.isfile(checkfile):
+        if (nextrepo != "fin"):
+            response = "This is Eagle-Six. "+repo+" repository "+action+"d. Starting "+nextrepo+" Repository, over. ("+str(count)+"/3)"
+            slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+            return None
+        if (nextrepo == "fin"):
+            response = "This is Eagle-Six. "+repo+" repository "+action+"d. ("+str(count)+"/3)"
+            slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+            return None
+    response = "There was a problem building "+repo+"repository. @volc should check the console output."
+    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 def repochecker(repo):
     if repo == "main":
@@ -232,7 +241,7 @@ def modlinemanage(operation,mod,repo):
             exist = True
 
     # Exit if no repo is selected by repochecker, the mod doesn't begin with an @, or the modfolder doesn't exist in the upload folder.
-    if ((repofile == "") or (exist != True) or (item[0][:1] != "@")) and (operation != "update"):
+    if ((repofile == "") or (exist != True) or (item[0][:1] != "@")) and ((operation != "update") or (repofile == "")):
         response = ("Parker, Bannon has made a mistake in the above command. Make sure it gets corrected. Perhaps the mod folder hasn't been uploaded or the syntax is wrong.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
         return None
