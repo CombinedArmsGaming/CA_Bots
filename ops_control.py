@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 1.1 14/8/2017          ######
+######  VERSION 1.2 14/8/2017          ######
 
 """
     QUICK GLOSSARY
@@ -116,14 +116,18 @@ def handle_command(command, channel):
         post_discord("Repositories have been taken down for update.")
         repobuilder("create")
         post_discord("@everyone repositories have been updated.")
+        response = ""
     if command.startswith(UPDATE_COMMAND):
         post_discord("Repositories have been taken down for update.")
         repobuilder("update")
         post_discord("@everyone repositories have been updated.")
+        response = ""
     if command.startswith(SBUILD_COMMAND):
         repobuilder("create")
+        response = ""
     if command.startswith(SUPDATE_COMMAND):
         repobuilder("update")
+        response = ""
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 def repobuilder(action):
