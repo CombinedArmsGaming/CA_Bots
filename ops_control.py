@@ -151,7 +151,7 @@ def repobuilder(action):
     # GENERATE TEST
     showmanage("test")
     subprocess.call("repogen.sh test "+action, shell=True)
-    confirmationmessage("test","fin","3")
+    confirmationmessage("test","fin","3",action)
     # Print confirmation message.
     response = "Eagle-Six to @volc and @klima. Repositories "+action+"d. Eagle-Six out."
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
