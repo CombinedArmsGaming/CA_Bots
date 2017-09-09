@@ -140,6 +140,10 @@ def repobuilder(action):
     print(action+" - all repositories.")
     response = "This is Eagle-Six to all units. Message received, silently "+action+" all repositories in succession. Starting Main Repository now, over. (0/3)"
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    # Ensure that all invlines are generated correctly before startup.
+    invlinegen("main")
+    invlinegen("ww2")
+    invlinegen("test")
     # GENERATE MAIN 
     showmanage("main")
     subprocess.call("repogen.sh main "+action, shell=True)
