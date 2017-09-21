@@ -18,6 +18,7 @@ import subprocess
 import requests
 import json
 import re
+import sys
 
 # Loads JSON data into dictionaries from bot configuration files
 with open('/python/slackbot/botconfig.json') as data_file:    
@@ -39,6 +40,7 @@ response = ""
 modline = []
 invline = []
 inputline = []
+restarted = False # Used to make sure the bot only ever reinstantiates itself once before killing itself.
 
 ###### COMMAND PREFIXES ######
 
@@ -340,7 +342,14 @@ if __name__ == "__main__":
     if slack_client.rtm_connect():
         print("Operations Controller connected and running!")
         while True:
-            command, channel = parse_slack_output(slack_client.rtm_read())
+            try:
+                command, channel = parse_slack_output(slack_client.rtm_read())
+            except:
+                print "Connection Broken"
+                if not restarted:
+                    restarted = True
+                    subprocess.call("/python/slackbot/cronjob.sh", shell=True)
+                    sys.exit()
             if command and channel:
                 handle_command(command, channel)
             time.sleep(READ_WEBSOCKET_DELAY)
