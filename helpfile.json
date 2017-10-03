@@ -1,7 +1,7 @@
 [
     {
         "name":"help",
-        "helptext":"For help with any command, type Help [Command]. For a list of commands, type Help List."
+        "helptext":"Usage: Help [Command]\nDisplays help prompt for any command. For a list of all commands, type Help List."
     },
     {
         "name":"list",
@@ -9,46 +9,46 @@
     },
     {
         "name":"come in",
-        "helptext":""
+        "helptext":"Usage: come in\nThe come in command lets the user test if Sawyer is active by forcing him to echo a response."
     },
     {
         "name":"thanks",
-        "helptext":""
+        "helptext":"Usage: thanks\nSawyer tells the user that they are bae."
     },
     {
         "name":"discordpost",
-        "helptext":""
+        "helptext":"Usage: discordpost [messagecontent]\nSawyer passes the message in messagecontent to Captain Bannon who then posts it to Discord. All messagecontent passed is lower case."
     },
     {
         "name":"open repo",
-        "helptext":""
+        "helptext":"Usage: open repo\nSawyer will force the repository server to enable the webserver, allowing access to the repositories."
     },
     {
         "name":"close repo",
-        "helptext":""
+        "helptext":"Usage: close repo\nSawyer will disable the webserver on the repository server, closing all access to the repositories."
     },
     {
         "name":"build repo",
-        "helptext":""
+        "helptext":"Usage: build repo\nSawyer will delete and then rebuild all repositories, and make a post in Discord."
     },
     {
         "name":"update repo",
-        "helptext":""
+        "helptext":"Usage: update repo\nSawyer will check all repositories, make any updates, and make a post in Discord."
     },
     {
         "name":"stealth build",
-        "helptext":""
+        "helptext":"Usage: stealth build\nSawyer will delete and then rebuild all repositories, without posting to Discord."
     },
     {
         "name":"stealth update",
-        "helptext":""
+        "helptext":"Usage: stealth update\nSawyer will check all repositories and make any updates without posting to Discord."
     },
     {
         "name":"modline",
-        "helptext":""
+        "helptext":"Usage: modline [add/remove] [@mod] [repo]\nSawyer will add or remove a mod from a given repo.\nWarning: Sawyer will return errors if the mod has not been uploaded to the repo server, or the repo doesn't exist.\nThis command does not perform an update, only adds/removes mods from the current repository configuration."
     },
     {
         "name":"show",
-        "helptext":""
+        "helptext":"Usage: show [repo]\nSawyer will print a list of all the mods currently in a given repository."
     }
 ]
