@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 1.6 14/8/2017          ######
+######  VERSION 1.7     3/10/2017      ######
 
 """
     QUICK GLOSSARY
@@ -94,7 +94,9 @@ def handle_command(command, channel):
         showmanage(str(showcmd[1]))
         response = ""
     if command.startswith(HELP_COMMAND):
-        response = "This is Eagle-Six. My job is to manage the repository automation service. Using discordpost <message> will post a short message to Discord. Type open repo or close repo if you need to open/close public access to the repository, or type build repo or update repo if you need to trigger repository construction. I respond to come in as well so you can check if I'm on station"
+	helpmsg = command[5:]
+	helpcommand(helpmsg)
+	response = ""
     if command.startswith(WEBON_COMMAND):
         response = "This is Eagle-Six. Repositories coming live, out."
         subprocess.call("service apache2 start", shell=True)
@@ -321,6 +323,9 @@ def modlinemanage(operation,mod,repo):
         response = ("Parker, I need to know what to do to the modline. Try telling me to add remove or update the modline.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
         return None
+
+def helpcommand(command):
+	#helpcommandgoeshere
 
 def parse_slack_output(slack_rtm_output):
     """
