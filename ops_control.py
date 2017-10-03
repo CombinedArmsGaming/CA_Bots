@@ -325,7 +325,10 @@ def modlinemanage(operation,mod,repo):
         return None
 
 def helpcommand(command):
-	#helpcommandgoeshere
+    try:
+        print(data[command]["helptext"])
+    except KeyError:
+        print("ID doesn't exist")
 
 def parse_slack_output(slack_rtm_output):
     """
