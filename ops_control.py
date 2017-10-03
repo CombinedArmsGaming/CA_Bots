@@ -25,6 +25,8 @@ with open('/python/slackbot/botconfig.json') as data_file:
     botparams = json.load(data_file)[0]
 with open('/python/slackbot/repoconfig.json') as data_file:    
     repoparams = json.load(data_file)
+with open('/python/slackbot/helpfile.json') as data_file:    
+    helpfile = json.load(data_file)
 
 # Instantiate Slackbot
 BOT_ID = botparams["slack-botid"]
@@ -326,9 +328,13 @@ def modlinemanage(operation,mod,repo):
 
 def helpcommand(command):
     try:
-        print(data[command]["helptext"])
+        print(helpfile[command]["helptext"])
+	response = (str(helpfile[command]["helptext"]))
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     except KeyError:
         print("ID doesn't exist")
+        response = ("ID doesn't exist")
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 def parse_slack_output(slack_rtm_output):
     """
