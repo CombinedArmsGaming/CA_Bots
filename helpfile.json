@@ -1,17 +1,54 @@
 [
     {
-        "name":"",
-        "repofile":"",
-        "command":""
+        "name":"help",
+        "helptext":"For help with any command, type Help [Command]. For a list of commands, type Help List."
     },
     {
-        "name":"",
-        "repofile":"",
-        "command":""
+        "name":"list",
+        "helptext":"The commands available are:\nhelp\ncome in\nlist\ndiscordpost\nopen repo\nclose repo\nbuild repo\nupdate repo\nstealth build\nstealth update\nmodline\nshow"
     },
     {
-        "name":"",
-        "repofile":"",
-        "command":""
+        "name":"come in",
+        "helptext":""
+    },
+    {
+        "name":"thanks",
+        "helptext":""
+    },
+    {
+        "name":"discordpost",
+        "helptext":""
+    },
+    {
+        "name":"open repo",
+        "helptext":""
+    },
+    {
+        "name":"close repo",
+        "helptext":""
+    },
+    {
+        "name":"build repo",
+        "helptext":""
+    },
+    {
+        "name":"update repo",
+        "helptext":""
+    },
+    {
+        "name":"stealth build",
+        "helptext":""
+    },
+    {
+        "name":"stealth update",
+        "helptext":""
+    },
+    {
+        "name":"modline",
+        "helptext":""
+    },
+    {
+        "name":"show",
+        "helptext":""
     }
 ]
