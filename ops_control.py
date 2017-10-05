@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 1.6 14/8/2017          ######
+######  VERSION 1.7     3/10/2017      ######
 
 """
     QUICK GLOSSARY
@@ -25,6 +25,8 @@ with open('/python/slackbot/botconfig.json') as data_file:
     botparams = json.load(data_file)[0]
 with open('/python/slackbot/repoconfig.json') as data_file:    
     repoparams = json.load(data_file)
+with open('/python/slackbot/helpfile.json') as data_file:    
+    helpfile = json.load(data_file)[0]
 
 # Instantiate Slackbot
 BOT_ID = botparams["slack-botid"]
@@ -94,7 +96,9 @@ def handle_command(command, channel):
         showmanage(str(showcmd[1]))
         response = ""
     if command.startswith(HELP_COMMAND):
-        response = "This is Eagle-Six. My job is to manage the repository automation service. Using discordpost <message> will post a short message to Discord. Type open repo or close repo if you need to open/close public access to the repository, or type build repo or update repo if you need to trigger repository construction. I respond to come in as well so you can check if I'm on station"
+	helpmsg = command[5:]
+	helpcommand(helpmsg)
+	response = ""
     if command.startswith(WEBON_COMMAND):
         response = "This is Eagle-Six. Repositories coming live, out."
         subprocess.call("service apache2 start", shell=True)
@@ -321,6 +325,20 @@ def modlinemanage(operation,mod,repo):
         response = ("Parker, I need to know what to do to the modline. Try telling me to add remove or update the modline.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
         return None
+
+def helpcommand(command):
+    # Checks if string entered was just the word "help" and then santises it for the JSON lookup.
+    if (str(command) == ""):
+        command = "help"
+    # tries/catches to check the helpfile for a key entry that matches the user request
+    try:
+        response = (str(helpfile[command]["helptext"]))
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    # handles moron users
+    except KeyError:
+        print("ID doesn't exist")
+        response = ("ID doesn't exist")
+        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 def parse_slack_output(slack_rtm_output):
     """
