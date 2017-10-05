@@ -327,11 +327,14 @@ def modlinemanage(operation,mod,repo):
         return None
 
 def helpcommand(command):
+    # Checks if string entered was just the word "help" and then santises it for the JSON lookup.
     if (str(command) == ""):
         command = "help"
+    # tries/catches to check the helpfile for a key entry that matches the user request
     try:
         response = (str(helpfile[command]["helptext"]))
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    # handles moron users
     except KeyError:
         print("ID doesn't exist")
         response = ("ID doesn't exist")
