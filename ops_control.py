@@ -141,9 +141,9 @@ def post_discord(message):
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 def repobuilder(action):
-	# Sanitise action and print beginning message.
+    # Sanitise action and print beginning message.
     action = str(action)
-    response = "This is Eagle-Six to all units. Message received, silently "+action+" all repositories in succession. Starting Main Repository now, over. (0/3)"
+    response = "This is Eagle-Six to all units. Message received, "+action+" all repositories in succession. Starting Main Repository now, over. (0/3)"
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     # Ensure that all invlines are generated correctly before startup.
     invlinegen("main")
@@ -333,7 +333,7 @@ def helpcommand(command):
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     # handles moron users
     except KeyError:
-        response = ("ID doesn't exist")
+        response = ("I didn't understand that help request Parker. Try typing Help List for a list of possible commands.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 def parse_slack_output(slack_rtm_output):
