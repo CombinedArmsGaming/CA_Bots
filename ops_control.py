@@ -327,9 +327,10 @@ def modlinemanage(operation,mod,repo):
         return None
 
 def helpcommand(command):
+    if (str(command) == ""):
+        command = "help"
     try:
-        print(helpfile[command]["helptext"])
-	response = (str(helpfile[command]["helptext"]))
+        response = (str(helpfile[command]["helptext"]))
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     except KeyError:
         print("ID doesn't exist")
