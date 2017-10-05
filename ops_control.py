@@ -26,7 +26,7 @@ with open('/python/slackbot/botconfig.json') as data_file:
 with open('/python/slackbot/repoconfig.json') as data_file:    
     repoparams = json.load(data_file)
 with open('/python/slackbot/helpfile.json') as data_file:    
-    helpfile = json.loads(open(database).read())
+    helpfile = json.load(data_file)
 
 # Instantiate Slackbot
 BOT_ID = botparams["slack-botid"]
