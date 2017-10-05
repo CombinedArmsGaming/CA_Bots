@@ -143,7 +143,6 @@ def post_discord(message):
 def repobuilder(action):
 	# Sanitise action and print beginning message.
     action = str(action)
-    print(action+" - all repositories.")
     response = "This is Eagle-Six to all units. Message received, silently "+action+" all repositories in succession. Starting Main Repository now, over. (0/3)"
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     # Ensure that all invlines are generated correctly before startup.
@@ -195,7 +194,6 @@ def repochecker(repo):
         repofile = repoparams[2]["repofile"]
         invfile = repoparams[2]["invfile"]
     if (repo != "main") and (repo != "ww2") and (repo != "test"):
-        print "this repository was not recognised"
         response = ("Parker, that repository wasn't recognised. Try again, over.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
         return ["",""]
@@ -321,7 +319,6 @@ def modlinemanage(operation,mod,repo):
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     if (operation != "add") and (operation != "remove") and (operation != "update"):
         # Chastises you for being silly
-        print "this operation was not recognised"
         response = ("Parker, I need to know what to do to the modline. Try telling me to add remove or update the modline.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
         return None
@@ -336,7 +333,6 @@ def helpcommand(command):
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     # handles moron users
     except KeyError:
-        print("ID doesn't exist")
         response = ("ID doesn't exist")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
