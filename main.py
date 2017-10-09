@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 1.7     3/10/2017      ######
+######  VERSION 1.8     09/10/2017     ######
 
 """
     QUICK GLOSSARY
@@ -128,8 +128,26 @@ def handle_command(command, channel):
         response = ""
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
+def filewriter(file,string):
+    # Simple filewriter that opens the file provided and overwrites the content with the string provided.
+    # Strip all line breaks. Line breaks are not approved for use in this software.
+    string = re.sub("\n", "", string)
+    # Write string to file.
+    f = open(file, 'w')
+    f.write(string)
+    f.close()
+
+def modlinecount(repo):
+    repofile=repochecker(repo)[0]
+    with open(repofile, 'r') as f:
+        modstring = f.readline()
+    modline = modstring.split(";")
+    modline[:] = [item for item in modline if item]
+    modline = set(modline)
+    return (len(modline))    
+
 def post_discord(message):
-	# Load message payload
+    # Load message payload
     payload =  json.dumps ( {"content":str(message)} )
     # Make HTTP request using header and payload defined earlier.
     r = requests.post('https://discordapp.com/api/channels/'+botparams["discord-channel"]+'/messages', headers=headers, data=payload)
@@ -172,11 +190,11 @@ def confirmationmessage(repo,nextrepo,count,action):
     # Check for the repo.srf file, and print the right error message.
     if os.path.isfile(checkfile):
         if (nextrepo != "fin"):
-            response = "This is Eagle-Six. "+repo+" repository "+action+"d. Starting "+nextrepo+" Repository, over. ("+str(count)+"/3)"
+            response = "This is Eagle-Six. "+repo+" repository "+action+"d ("+(str(modlinecount(repo)))+" mods). Starting "+nextrepo+" Repository ("+(str(modlinecount(nextrepo)))+" mods), over. ("+str(count)+"/3)"
             slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
             return None
         if (nextrepo == "fin"):
-            response = "This is Eagle-Six. "+repo+" repository "+action+"d. ("+str(count)+"/3)"
+            response = "This is Eagle-Six. "+repo+" repository "+action+"d ("+(str(modlinecount(repo)))+" mods). ("+str(count)+"/3)"
             slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
             return None
     # Print error message if repo.srf doesn't exist.
@@ -199,15 +217,6 @@ def repochecker(repo):
         return ["",""]
     return [repofile,invfile]
 
-def filewriter(file,string):
-    # Simple filewriter that opens the file provided and overwrites the content with the string provided.
-    # Strip all line breaks. Line breaks are not approved for use in this software.
-    string = re.sub("\n", "", string)
-    # Write string to file.
-    f = open(file, 'w')
-    f.write(string)
-    f.close()
-
 def showmanage(repo):
 	# Check which repo file is to be used and sanity checks it.
     repofile=repochecker(repo)[0]
@@ -222,7 +231,7 @@ def showmanage(repo):
     with open(invfile, 'r') as f:
         invstring = f.readline()
     # Print the contents of the files.
-    response = ("Parker. The " + repo + "repository contains these mods: " + modstring)
+    response = ("Parker. The " + repo + "repository contains these "+str(modlinecount(repo))+" mods: " + modstring)
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     response = ("And Swifty will ignore these mods: " + invstring)
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
@@ -291,7 +300,7 @@ def modlinemanage(operation,mod,repo):
         # Generates invline file from newly updated modline.
         invlinegen(str(repo))
         # ...and tells you what it's done.
-        response = ("Added " + mod + " to " + repo + " modline, over.")
+        response = ("Added " + mod + " to " + repo + " modline, over. (now "+(str(modlinecount(repo)))+" mods)")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     if operation == "remove":
         # Generates new modline by regenerating modline and omitting mods that match the one being removed.
@@ -309,7 +318,7 @@ def modlinemanage(operation,mod,repo):
         # Generates invline from newly generated modline.
         invlinegen(str(repo))
         # Then tells everyone it's a clever boy.
-        response = ("Removed " + mod + " from " + repo + " modline, over.")
+        response = ("Removed " + mod + " from " + repo + " modline, over. (now "+(str(modlinecount(repo)))+" mods)")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     if operation == "update":
         # Doesn't give a damn, just generates an invline.
