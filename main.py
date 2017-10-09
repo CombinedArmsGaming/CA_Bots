@@ -190,11 +190,11 @@ def confirmationmessage(repo,nextrepo,count,action):
     # Check for the repo.srf file, and print the right error message.
     if os.path.isfile(checkfile):
         if (nextrepo != "fin"):
-            response = "This is Eagle-Six. "+repo+" repository "+action+"d. Starting "+nextrepo+" Repository, over. ("+str(count)+"/3)"
+            response = "This is Eagle-Six. "+repo+" repository "+action+"d ("+(str(modlinecount(repo)))+" mods). Starting "+nextrepo+" Repository ("+(str(modlinecount(nextrepo)))+" mods), over. ("+str(count)+"/3)"
             slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
             return None
         if (nextrepo == "fin"):
-            response = "This is Eagle-Six. "+repo+" repository "+action+"d. ("+str(count)+"/3)"
+            response = "This is Eagle-Six. "+repo+" repository "+action+"d ("+(str(modlinecount(repo)))+" mods). ("+str(count)+"/3)"
             slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
             return None
     # Print error message if repo.srf doesn't exist.
@@ -231,7 +231,7 @@ def showmanage(repo):
     with open(invfile, 'r') as f:
         invstring = f.readline()
     # Print the contents of the files.
-    response = ("Parker. The " + repo + "repository contains these mods: " + modstring)
+    response = ("Parker. The " + repo + "repository contains these "+str(modlinecount(repo))+" mods: " + modstring)
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     response = ("And Swifty will ignore these mods: " + invstring)
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
