@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 1.7     3/10/2017      ######
+######  VERSION 1.8     09/10/2017     ######
 
 """
     QUICK GLOSSARY
@@ -137,10 +137,10 @@ def filewriter(file,string):
     f.write(string)
     f.close()
 
-def modcounter(repo):
+def modlinecount(repo):
     repofile=repochecker(repo)[0]
     with open(repofile, 'r') as f:
-    modstring = f.readline()
+        modstring = f.readline()
     modline = modstring.split(";")
     modline[:] = [item for item in modline if item]
     modline = set(modline)
@@ -300,7 +300,7 @@ def modlinemanage(operation,mod,repo):
         # Generates invline file from newly updated modline.
         invlinegen(str(repo))
         # ...and tells you what it's done.
-        response = ("Added " + mod + " to " + repo + " modline, over.")
+        response = ("Added " + mod + " to " + repo + " modline, over. (now "+(str(modlinecount(repo)))+" mods)")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     if operation == "remove":
         # Generates new modline by regenerating modline and omitting mods that match the one being removed.
@@ -318,7 +318,7 @@ def modlinemanage(operation,mod,repo):
         # Generates invline from newly generated modline.
         invlinegen(str(repo))
         # Then tells everyone it's a clever boy.
-        response = ("Removed " + mod + " from " + repo + " modline, over.")
+        response = ("Removed " + mod + " from " + repo + " modline, over. (now "+(str(modlinecount(repo)))+" mods)")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     if operation == "update":
         # Doesn't give a damn, just generates an invline.
