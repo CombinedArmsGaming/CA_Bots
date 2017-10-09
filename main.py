@@ -128,8 +128,26 @@ def handle_command(command, channel):
         response = ""
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
+def filewriter(file,string):
+    # Simple filewriter that opens the file provided and overwrites the content with the string provided.
+    # Strip all line breaks. Line breaks are not approved for use in this software.
+    string = re.sub("\n", "", string)
+    # Write string to file.
+    f = open(file, 'w')
+    f.write(string)
+    f.close()
+
+def modcounter(repo):
+    repofile=repochecker(repo)[0]
+    with open(repofile, 'r') as f:
+    modstring = f.readline()
+    modline = modstring.split(";")
+    modline[:] = [item for item in modline if item]
+    modline = set(modline)
+    return (len(modline))    
+
 def post_discord(message):
-	# Load message payload
+    # Load message payload
     payload =  json.dumps ( {"content":str(message)} )
     # Make HTTP request using header and payload defined earlier.
     r = requests.post('https://discordapp.com/api/channels/'+botparams["discord-channel"]+'/messages', headers=headers, data=payload)
@@ -198,15 +216,6 @@ def repochecker(repo):
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
         return ["",""]
     return [repofile,invfile]
-
-def filewriter(file,string):
-    # Simple filewriter that opens the file provided and overwrites the content with the string provided.
-    # Strip all line breaks. Line breaks are not approved for use in this software.
-    string = re.sub("\n", "", string)
-    # Write string to file.
-    f = open(file, 'w')
-    f.write(string)
-    f.close()
 
 def showmanage(repo):
 	# Check which repo file is to be used and sanity checks it.
