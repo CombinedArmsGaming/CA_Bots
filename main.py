@@ -40,8 +40,6 @@ reddit = praw.Reddit(client_id=botparams["reddit-client-id"],
                      user_agent=botparams["reddit-agent"],
                      username=botparams["reddit-username"])
 
-print(reddit.user.me())
-
 # Discord HTTP header initialisation
 headers = { "Authorization":botparams["discord-token"],
             "User-Agent":"myBotThing (http://some.url, v0.1)",
@@ -387,8 +385,9 @@ if __name__ == "__main__":
             if command and channel:
                 handle_command(command, channel)
             time.sleep(READ_WEBSOCKET_DELAY)
-	    subreddit = reddit.subreddit('combinedarms')
-            for submission in subreddit.stream.submissions():
-                    print("there was a submission to combinedarms")
+	    #subreddit = reddit.subreddit('combinedarms')
+            #for submission in subreddit.new(limit=1):
+            #        print submission.title
+            #        break
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
