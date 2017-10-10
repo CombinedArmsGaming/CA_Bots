@@ -5,6 +5,11 @@
         "slack-botid":"",
         "discord-token":"",
         "discord-channel":"",
+        "reddit-client-id":"",
+        "reddit-client-secret":"",
+        "reddit-password":"",
+        "reddit-agent":"",
+        "reddit-username":"",
         "watchfolder":""
     }
 ]
