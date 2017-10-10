@@ -387,5 +387,8 @@ if __name__ == "__main__":
             if command and channel:
                 handle_command(command, channel)
             time.sleep(READ_WEBSOCKET_DELAY)
+	    subreddit = reddit.subreddit('combinedarms')
+            for submission in subreddit.stream.submissions():
+                    print("there was a submission to combinedarms")
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
