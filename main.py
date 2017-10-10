@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 1.8     09/10/2017     ######
+######  VERSION 1.9     10/10/2017     ######
 
 """
     QUICK GLOSSARY
@@ -19,6 +19,7 @@ import requests
 import json
 import re
 import sys
+import praw
 
 # Loads JSON data into dictionaries from bot configuration files
 with open('/python/slackbot/botconfig.json') as data_file:    
