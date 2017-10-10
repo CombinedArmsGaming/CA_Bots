@@ -31,6 +31,16 @@ with open('/python/slackbot/helpfile.json') as data_file:
 # Instantiate Slackbot
 BOT_ID = botparams["slack-botid"]
 slack_client = SlackClient(botparams["slack-token"])
+
+# Instantiate Reddit Bot
+reddit = praw.Reddit(client_id=botparams["reddit-client-id"],
+                     client_secret=botparams["reddit-client-secret"],
+                     password=botparams["reddit-password"],
+                     user_agent=botparams["reddit-agent"],
+                     username=botparams["reddit-username"])
+
+print(reddit.user.me())
+
 # Discord HTTP header initialisation
 headers = { "Authorization":botparams["discord-token"],
             "User-Agent":"myBotThing (http://some.url, v0.1)",
