@@ -4,7 +4,6 @@
         "slack-token":"",
         "slack-botid":"",
         "discord-token":"",
-        "discord-channel":"",
         "reddit-client-id":"",
         "reddit-client-secret":"",
         "reddit-password":"",

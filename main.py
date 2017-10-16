@@ -28,6 +28,8 @@ with open('/python/slackbot/repoconfig.json') as data_file:
     repoparams = json.load(data_file)
 with open('/python/slackbot/helpfile.json') as data_file:    
     helpfile = json.load(data_file)[0]
+with open('/python/slackbot/discordconfig.json') as data_file:
+	discordchannels = json.load(data_file)[0]
 
 # Instantiate Slackbot
 BOT_ID = botparams["slack-botid"]
@@ -92,7 +94,10 @@ def handle_command(command, channel):
         action = str(gencmd[2])
     if command.startswith(DISCORD_COMMAND):
         msg = command.replace("discordpost", " ", 1)
-        post_discord(str(msg))
+        msgsplit = msg.split(" ")
+        msgsplit[:] = [item for item in msgsplit if item]
+        msg = msg.replace(str(msgsplit[0]), "", 1)
+        post_discord(str(msgsplit[0]),msg)
         response = ""
     if command.startswith(MODLINE_COMMAND):
         msg = command.replace("modline", "", 1)
@@ -111,23 +116,23 @@ def handle_command(command, channel):
     if command.startswith(WEBON_COMMAND):
         response = "This is Eagle-Six. Repositories coming live, out."
         subprocess.call("service apache2 start", shell=True)
-        post_discord("@everyone repositories are back up.")
+        post_discord("announcements","@everyone repositories are back up.")
     if command.startswith(THANKS_COMMAND):
         response = "This is Eagle-Six. Anything for Bae, over."
         subprocess.call("service apache2 start", shell=True)
     if command.startswith(WEBOFF_COMMAND):
         response = "This is Eagle-Six. Repositories going dark, out."
         subprocess.call("service apache2 stop", shell=True)
-        post_discord("@everyone repositories have been taken down for update.")
+        post_discord("announcements","@everyone repositories have been taken down for update.")
     if command.startswith(BUILD_COMMAND):
-        post_discord("Repositories have been taken down for update.")
+        post_discord("announcements","Repositories have been taken down for update.")
         repobuilder("create")
-        post_discord("@everyone repositories have been updated.")
+        post_discord("announcements","@everyone repositories have been updated.")
         response = ""
     if command.startswith(UPDATE_COMMAND):
-        post_discord("Repositories have been taken down for update.")
+        post_discord("announcements","Repositories have been taken down for update.")
         repobuilder("update")
-        post_discord("@everyone repositories have been updated.")
+        post_discord("announcements","@everyone repositories have been updated.")
         response = ""
     if command.startswith(SBUILD_COMMAND):
         repobuilder("create")
@@ -155,11 +160,11 @@ def modlinecount(repo):
     modline = set(modline)
     return (len(modline))    
 
-def post_discord(message):
+def post_discord(channel,message):
     # Load message payload
     payload =  json.dumps ( {"content":str(message)} )
     # Make HTTP request using header and payload defined earlier.
-    r = requests.post('https://discordapp.com/api/channels/'+botparams["discord-channel"]+'/messages', headers=headers, data=payload)
+    r = requests.post('https://discordapp.com/api/channels/'+discordchannels[str(channel)]+'/messages', headers=headers, data=payload)
     # Prepare error message and overwrite it if the request was successful.
     response = ("Returned error code: " + str(r.status_code))
     if r.status_code == 200:
