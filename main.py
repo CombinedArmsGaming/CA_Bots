@@ -390,7 +390,7 @@ if __name__ == "__main__":
             if command and channel:
                 handle_command(command, channel)
             time.sleep(READ_WEBSOCKET_DELAY)
-	    #subreddit = reddit.subreddit('combinedarms')
+        #subreddit = reddit.subreddit('combinedarms')
             #for submission in subreddit.new(limit=1):
             #        print submission.title
             #        break
