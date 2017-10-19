@@ -366,7 +366,6 @@ def helpcommand(command):
 def eventposthandle(submission):
     eventstring = submission.title
     if((eventstring.count("|")!=2) or ("]" not in eventstring) or ("[" not in eventstring)):
-        print "not an event submission"
         return
     postdictionary = {"original":"","game":"","event-title":"","event-desc":"","event-datetime":"","event-host":"","event-url":"","reddit-id":"","discord-id":""}
     
