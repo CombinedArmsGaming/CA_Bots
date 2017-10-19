@@ -20,6 +20,7 @@ import json
 import re
 import sys
 import praw
+from datetime import datetime
 
 # Loads JSON data into dictionaries from bot configuration files
 with open('/python/slackbot/botconfig.json') as data_file:    
@@ -30,6 +31,8 @@ with open('/python/slackbot/helpfile.json') as data_file:
     helpfile = json.load(data_file)[0]
 with open('/python/slackbot/discordconfig.json') as data_file:
 	discordchannels = json.load(data_file)[0]
+with open('/python/slackbot/redditevents.json') as json_file:  
+    jsondictionary = json.load(json_file)
 
 # Instantiate Slackbot
 BOT_ID = botparams["slack-botid"]
@@ -41,6 +44,7 @@ reddit = praw.Reddit(client_id=botparams["reddit-client-id"],
                      password=botparams["reddit-password"],
                      user_agent=botparams["reddit-agent"],
                      username=botparams["reddit-username"])
+subreddit = reddit.subreddit('combinedarms')
 
 # Discord HTTP header initialisation
 headers = { "Authorization":botparams["discord-token"],
@@ -359,6 +363,56 @@ def helpcommand(command):
         response = ("I didn't understand that help request Parker. Try typing Help List for a list of possible commands.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
+def eventposthandle(submission):
+    eventstring = submission.title
+    #if((line.count("|")!=2) or ("]" not in line) or ("[" not in line)):
+        #print "not an event submission"
+        #continue
+    postdictionary = {"original":"","game":"","event-title":"","event-desc":"","event-datetime":"","event-host":"","event-url":"","reddit-id":"","discord-id":""}
+    
+    ##### EATS STRINGS #####
+        
+    postdictionary["original"]=eventstring
+    postdictionary["reddit-id"]=submission.shortlink
+    postdictionary["discord-id"]="testdiscordid"
+    postdictionary["event-host"]=str(submission.author)
+    postdictionary["event-url"]=submission.url
+        
+    # Identifies game string & enters it
+    game = eventstring.split("]")[:1]
+    game = (str(game)[4:(len(str(game))-2)])
+    postdictionary["game"] = game
+        
+    # Identifies and isolates metadata strings
+        
+    digester = eventstring.split("|")
+    blanklist = []
+        
+    stripvalue = len(game)+3
+    digester[0] = digester[0][stripvalue:]
+    for unit in digester:
+        unit = unit.strip()
+        blanklist.append(unit)
+    
+    postdictionary["event-title"]=blanklist[0]
+    postdictionary["event-desc"]=blanklist[1]
+    
+    # Parsing the date into something useful
+    blanklist[2] = blanklist[2].replace(" UTC","")
+    try:
+        blanklist[2] = datetime.strptime(blanklist[2],'%a %b%d %H%M')
+        # Apply correct year if someone schedules an event early in the next year
+        blanklist[2] = blanklist[2].replace(year = datetime.now().year)
+        if(blanklist[2].month < datetime.today().month):
+            blanklist[2] = blanklist[2].replace(year = (datetime.now().year+1))    
+        postdictionary["event-datetime"]=str(blanklist[2])
+    except:
+        postdictionary["event-datetime"]=""
+    if postdictionary not in jsondictionary:
+        jsondictionary.append(postdictionary)
+    with open('/python/slackbot/redditevents.json', 'w') as outfile:  
+        json.dump(jsondictionary, outfile,indent=4)
+
 def parse_slack_output(slack_rtm_output):
     """
         The Slack Real Time Messaging API is an events firehose.
@@ -390,9 +444,8 @@ if __name__ == "__main__":
             if command and channel:
                 handle_command(command, channel)
             time.sleep(READ_WEBSOCKET_DELAY)
-        #subreddit = reddit.subreddit('combinedarms')
-            #for submission in subreddit.new(limit=1):
-            #        print submission.title
-            #        break
+            for submission in subreddit.new(limit=1):
+                    eventposthandle(submission)
+                    break
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
