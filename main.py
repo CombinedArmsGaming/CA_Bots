@@ -409,6 +409,7 @@ def eventposthandle(submission):
         postdictionary["event-datetime"]=""
     if postdictionary not in jsondictionary:
         jsondictionary.append(postdictionary)
+        post_discord(botchannel,postdictionary["event-url"])
     with open('/python/slackbot/redditevents.json', 'w') as outfile:  
         json.dump(jsondictionary, outfile,indent=4)
 
