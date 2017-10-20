@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 1.9     10/10/2017     ######
+######  VERSION 1.9.1   20/10/2017     ######
 
 """
     QUICK GLOSSARY
@@ -175,6 +175,13 @@ def post_discord(channel,message):
         response = "Posted to Discord"
     # Tell everyone you've been a good boy
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+	
+def get_discord(channel):
+    # Make HTTP request using header and payload defined earlier.
+    r = requests.get('https://discordapp.com/api/channels/'+discordchannels[str(channel)]+'/messages', headers=headers)
+    with open('/python/slackbot/discordmessages.json', 'w') as outfile:  
+        json.dump(r.json(), outfile,indent=4)
+    return r.json()
 
 def repobuilder(action):
     # Sanitise action and print beginning message.
@@ -444,7 +451,23 @@ if __name__ == "__main__":
                 handle_command(command, channel)
             time.sleep(READ_WEBSOCKET_DELAY)
             for submission in subreddit.new(limit=1):
-                    eventposthandle(submission)
-                    break
+                eventposthandle(submission)
+		break
+            eventscontent = get_discord("events")
+            for item in eventscontent:
+                for post in jsondictionary:
+                    if str(post["reddit-id"]) in str(item):
+                        postdate = datetime.strptime(post["event-datetime"],'%Y-%m-%d %H:%M:%S')
+                        postdate = postdate.replace(hour = postdate.hour+1)
+                        nowdate = datetime.now()
+                        if postdate < nowdate:
+                            print "this has already happened"
+                            jsondictionary.remove(item)
+                            with open('/python/slackbot/redditevents.json', 'w') as outfile:  
+                                json.dump(jsondictionary, outfile,indent=4)
+                            r = requests.delete('https://discordapp.com/api/channels/'+discordchannels[str(channel)]+'/messages/'+item["id"], headers=headers)
+                            with open('/python/slackbot/redditevents.json') as json_file:  
+                                jsondictionary = json.load(json_file)
+                    
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
