@@ -456,7 +456,7 @@ if __name__ == "__main__":
             eventscontent = get_discord("events")
             for item in eventscontent:
                 for post in jsondictionary:
-                    if str(post["reddit-id"]) in str(item):
+                    if str(post["reddit-id"][-6:]) in str(item):
                         postdate = datetime.strptime(post["event-datetime"],'%Y-%m-%d %H:%M:%S')
                         postdate = postdate.replace(hour = postdate.hour+1)
                         nowdate = datetime.now()
