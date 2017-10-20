@@ -367,13 +367,12 @@ def eventposthandle(submission):
     eventstring = submission.title
     if((eventstring.count("|")!=2) or ("]" not in eventstring) or ("[" not in eventstring)):
         return
-    postdictionary = {"original":"","game":"","event-title":"","event-desc":"","event-datetime":"","event-host":"","event-url":"","reddit-id":"","discord-id":""}
+    postdictionary = {"original":"","game":"","event-title":"","event-desc":"","event-datetime":"","event-host":"","event-url":"","reddit-id":""}
     
     ##### EATS STRINGS #####
         
     postdictionary["original"]=eventstring
     postdictionary["reddit-id"]=submission.shortlink
-    postdictionary["discord-id"]="testdiscordid"
     postdictionary["event-host"]=str(submission.author)
     postdictionary["event-url"]=submission.url
         
