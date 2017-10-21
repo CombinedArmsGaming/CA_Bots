@@ -30,7 +30,7 @@ with open('/python/slackbot/repoconfig.json') as data_file:
 with open('/python/slackbot/helpfile.json') as data_file:    
     helpfile = json.load(data_file)[0]
 with open('/python/slackbot/discordconfig.json') as data_file:
-	discordchannels = json.load(data_file)[0]
+    discordchannels = json.load(data_file)[0]
 with open('/python/slackbot/redditevents.json') as json_file:  
     jsondictionary = json.load(json_file)
 
@@ -114,9 +114,9 @@ def handle_command(command, channel):
         showmanage(str(showcmd[1]))
         response = ""
     if command.startswith(HELP_COMMAND):
-	helpmsg = command[5:]
-	helpcommand(helpmsg)
-	response = ""
+    helpmsg = command[5:]
+    helpcommand(helpmsg)
+    response = ""
     if command.startswith(WEBON_COMMAND):
         response = "This is Eagle-Six. Repositories coming live, out."
         subprocess.call("service apache2 start", shell=True)
@@ -175,7 +175,7 @@ def post_discord(channel,message):
         response = "Posted to Discord"
     # Tell everyone you've been a good boy
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
-	
+    
 def get_discord(channel):
     # Make HTTP request using header and payload defined earlier.
     r = requests.get('https://discordapp.com/api/channels/'+discordchannels[str(channel)]+'/messages', headers=headers)
@@ -209,7 +209,7 @@ def repobuilder(action):
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 def confirmationmessage(repo,nextrepo,count,action):
-	# swifty repo.srf is created at the end of a successful repo generation. We can test for it's existence after a generation attempt to check success.
+    # swifty repo.srf is created at the end of a successful repo generation. We can test for it's existence after a generation attempt to check success.
     # Create repo.srf file path identifier
     checkfile = "/var/www/html/"+repo+"/repo.srf"
     # Check for the repo.srf file, and print the right error message.
@@ -243,7 +243,7 @@ def repochecker(repo):
     return [repofile,invfile]
 
 def showmanage(repo):
-	# Check which repo file is to be used and sanity checks it.
+    # Check which repo file is to be used and sanity checks it.
     repofile=repochecker(repo)[0]
     invfile=repochecker(repo)[1]
     if (repofile == ""):
@@ -279,7 +279,7 @@ def invlinegen(repo):
     invline = [item for item in inputline if item not in modline]
     # Generates invline string from list
     for mod in invline:
-    	invstring = (invstring + str(mod)+ ";")
+        invstring = (invstring + str(mod)+ ";")
     # Writes invline string to file
     filewriter(invfile,invstring)    
 
@@ -319,7 +319,7 @@ def modlinemanage(operation,mod,repo):
         # Prepares modstring for use, and generates modstring from list.
         modstring = ""
         for mods in modline:
-    	    modstring = (modstring + str(mods)+ ";")
+            modstring = (modstring + str(mods)+ ";")
         # Writes modstring to file.
         filewriter(repofile,modstring)
         # Generates invline file from newly updated modline.
@@ -337,7 +337,7 @@ def modlinemanage(operation,mod,repo):
         # Prepares modstring for use, and generates new modfile string. 
         modstring = ""
         for mods in modline:
-    	    modstring = (modstring + str(mods)+ ";")
+            modstring = (modstring + str(mods)+ ";")
         # Writes modline string to file.
         filewriter(repofile,modstring)
         # Generates invline from newly generated modline.
@@ -412,8 +412,11 @@ def eventposthandle(submission):
             blanklist[2] = blanklist[2].replace(year = (datetime.now().year+1))    
         postdictionary["event-datetime"]=str(blanklist[2])
     except:
-        postdictionary["event-datetime"]=""
-    if postdictionary not in jsondictionary:
+        postdictionary["event-datetime"]="2000-04-01 19:00:00"
+    nowdate = datetime.now()
+    postdate = datetime.strptime(postdictionary["event-datetime"],'%Y-%m-%d %H:%M:%S')
+    postdate = postdate.replace(hour = postdate.hour+1)
+    if (postdictionary not in jsondictionary) and (postdate > nowdate):
         jsondictionary.append(postdictionary)
         post_discord("events",postdictionary["event-url"])
     with open('/python/slackbot/redditevents.json', 'w') as outfile:  
@@ -452,7 +455,7 @@ if __name__ == "__main__":
             time.sleep(READ_WEBSOCKET_DELAY)
             for submission in subreddit.new(limit=1):
                 eventposthandle(submission)
-		break
+        break
             eventscontent = get_discord("events")
             for item in eventscontent:
                 for post in jsondictionary:
@@ -461,11 +464,10 @@ if __name__ == "__main__":
                         postdate = postdate.replace(hour = postdate.hour+1)
                         nowdate = datetime.now()
                         if postdate < nowdate:
-                            print "this has already happened"
-                            jsondictionary.remove(item)
+                            jsondictionary.remove(post)
                             with open('/python/slackbot/redditevents.json', 'w') as outfile:  
                                 json.dump(jsondictionary, outfile,indent=4)
-                            r = requests.delete('https://discordapp.com/api/channels/'+discordchannels[str(channel)]+'/messages/'+item["id"], headers=headers)
+                            r = requests.delete('https://discordapp.com/api/channels/'+discordchannels["events"]+'/messages/'+item["id"], headers=headers)
                             with open('/python/slackbot/redditevents.json') as json_file:  
                                 jsondictionary = json.load(json_file)
                     
