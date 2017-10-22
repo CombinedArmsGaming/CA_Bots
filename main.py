@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 1.9.1   20/10/2017     ######
+######  VERSION 1.9.2   22/10/2017     ######
 
 """
     QUICK GLOSSARY
@@ -33,6 +33,8 @@ with open('/python/slackbot/discordconfig.json') as data_file:
     discordchannels = json.load(data_file)[0]
 with open('/python/slackbot/redditevents.json') as json_file:  
     jsondictionary = json.load(json_file)
+with open('/python/slackbot/redditposts.json') as json_file:  
+    postsdictionary = json.load(json_file)
 
 # Instantiate Slackbot
 BOT_ID = botparams["slack-botid"]
@@ -114,9 +116,9 @@ def handle_command(command, channel):
         showmanage(str(showcmd[1]))
         response = ""
     if command.startswith(HELP_COMMAND):
-    helpmsg = command[5:]
-    helpcommand(helpmsg)
-    response = ""
+        helpmsg = command[5:]
+        helpcommand(helpmsg)
+        response = ""
     if command.startswith(WEBON_COMMAND):
         response = "This is Eagle-Six. Repositories coming live, out."
         subprocess.call("service apache2 start", shell=True)
@@ -182,6 +184,48 @@ def get_discord(channel):
     with open('/python/slackbot/discordmessages.json', 'w') as outfile:  
         json.dump(r.json(), outfile,indent=4)
     return r.json()
+
+def post_reddit(post="aar",eventtitle=""):
+    global postsdictionary
+    for item in postsdictionary:
+        if((item["postname"] == post) or ((datetime.strptime(item["nextpost"],'%Y-%m-%d %H:%M:%S')) < datetime.now())):
+            postsdictionary.remove(item)
+
+            # MAKE POST ON SUBREDDIT
+            subreddit = reddit.subreddit(item["subreddit"])
+            subreddit.submit(title=item["posttitle"]+eventtitle, selftext=item["postbody"])
+            subreddit = reddit.subreddit('combinedarms')
+
+            # CALCULATE NEXT POST TIME
+            calcpost = datetime.strptime(item["nextpost"],'%Y-%m-%d %H:%M:%S')
+            if("s" in item["postinterval"]):
+                tempval = int(re.sub("\D", "", item["postinterval"]))
+                item["nextpost"] = calcpost.replace(second = calcpost.second+tempval)
+            elif("h" in item["postinterval"]):
+                tempval = int(re.sub("\D", "", item["postinterval"]))
+                item["nextpost"] = calcpost.replace(hour = calcpost.hour+tempval)
+            elif("d" in item["postinterval"]):
+                tempval = int(re.sub("\D", "", item["postinterval"]))
+                item["nextpost"] = calcpost.replace(day = calcpost.day+tempval)
+            elif("m" in item["postinterval"]):
+                tempval = int(re.sub("\D", "", item["postinterval"]))
+                item["nextpost"] = calcpost.replace(month = calcpost.month+tempval)
+            elif("y" in item["postinterval"]):
+                tempval = int(re.sub("\D", "", item["postinterval"]))
+                item["nextpost"] = calcpost.replace(year = calcpost.year+tempval)
+            else:
+                item["nextpost"] = calcpost.replace(second = calcpost.second()+1)
+
+            item["nextpost"] = str(item["nextpost"])
+            postsdictionary.append(item)
+
+            # RELOADS POSTS DICTIONARY
+            with open('/python/slackbot/redditposts.json', 'w') as outfile:  
+                json.dump(postsdictionary, outfile,indent=4)
+            with open('/python/slackbot/redditposts.json') as json_file:  
+                postsdictionary = json.load(json_file)
+
+
 
 def repobuilder(action):
     # Sanitise action and print beginning message.
@@ -415,7 +459,7 @@ def eventposthandle(submission):
         postdictionary["event-datetime"]="2000-04-01 19:00:00"
     nowdate = datetime.now()
     postdate = datetime.strptime(postdictionary["event-datetime"],'%Y-%m-%d %H:%M:%S')
-    postdate = postdate.replace(hour = postdate.hour+1)
+    postdate = postdate.replace(hour = postdate.hour)
     if (postdictionary not in jsondictionary) and (postdate > nowdate):
         jsondictionary.append(postdictionary)
         post_discord("events",postdictionary["event-url"])
@@ -455,19 +499,20 @@ if __name__ == "__main__":
             time.sleep(READ_WEBSOCKET_DELAY)
             for submission in subreddit.new(limit=1):
                 eventposthandle(submission)
-        break
+                break
             eventscontent = get_discord("events")
             for item in eventscontent:
                 for post in jsondictionary:
                     if str(post["reddit-id"][-6:]) in str(item):
                         postdate = datetime.strptime(post["event-datetime"],'%Y-%m-%d %H:%M:%S')
-                        postdate = postdate.replace(hour = postdate.hour+1)
+                        postdate = postdate.replace(hour = postdate.hour)
                         nowdate = datetime.now()
                         if postdate < nowdate:
                             jsondictionary.remove(post)
                             with open('/python/slackbot/redditevents.json', 'w') as outfile:  
                                 json.dump(jsondictionary, outfile,indent=4)
                             r = requests.delete('https://discordapp.com/api/channels/'+discordchannels["events"]+'/messages/'+item["id"], headers=headers)
+                            post_reddit(post="aar",eventtitle=post["event-title"])
                             with open('/python/slackbot/redditevents.json') as json_file:  
                                 jsondictionary = json.load(json_file)
                     
