@@ -538,6 +538,9 @@ if __name__ == "__main__":
                                     jsondictionary = json.load(json_file)
             except exceptions.Exception as e:
                 log_exception(e)
+                if not restarted:
+                    restarted = True
+                    sys.exit()
                 
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
