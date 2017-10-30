@@ -56,7 +56,7 @@ headers = { "Authorization":botparams["discord-token"],
 
 logging.basicConfig( filename="/python/slackbot/bot.log",
                      filemode='w',
-                     level=logging.DEBUG,
+                     level=logging.INFO,
                      format= '%(asctime)s - %(levelname)s - %(message)s')
 
 # Global Variable Pre-Sanitisation
