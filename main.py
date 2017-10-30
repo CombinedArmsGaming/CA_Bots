@@ -20,6 +20,7 @@ import json
 import re
 import sys
 import praw
+import logging
 from datetime import datetime
 
 # Loads JSON data into dictionaries from bot configuration files
@@ -52,6 +53,11 @@ subreddit = reddit.subreddit('combinedarms')
 headers = { "Authorization":botparams["discord-token"],
             "User-Agent":"myBotThing (http://some.url, v0.1)",
             "Content-Type":"application/json", }
+
+logging.basicConfig( filename="/python/slackbot/bot.log",
+                     filemode='w',
+                     level=logging.DEBUG,
+                     format= '%(asctime)s - %(levelname)s - %(message)s')
 
 # Global Variable Pre-Sanitisation
 AT_BOT = "<@" + BOT_ID + ">"
@@ -147,6 +153,20 @@ def handle_command(command, channel):
         repobuilder("update")
         response = ""
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+
+def extract_function_name():
+    tb = sys.exc_info()[-1]
+    stk = traceback.extract_tb(tb, 1)
+    fname = stk[0][3]
+    return fname
+
+def log_exception(e):
+    logging.error(
+    "Function {function_name} raised {exception_class} ({exception_docstring}): {exception_message}".format(
+    function_name = extract_function_name(),
+    exception_class = e.__class__,
+    exception_docstring = e.__doc__,
+    exception_message = e.message))
 
 def filewriter(file,string):
     # Simple filewriter that opens the file provided and overwrites the content with the string provided.
@@ -487,34 +507,37 @@ if __name__ == "__main__":
         print("Operations Controller connected and running!")
         while True:
             try:
-                command, channel = parse_slack_output(slack_client.rtm_read())
-            except:
-                print "Connection Broken"
-                if not restarted:
-                    restarted = True
-                    subprocess.call("/python/slackbot/cronjob.sh", shell=True)
-                    sys.exit()
-            if command and channel:
-                handle_command(command, channel)
-            time.sleep(READ_WEBSOCKET_DELAY)
-            for submission in subreddit.new(limit=1):
-                eventposthandle(submission)
-                break
-            eventscontent = get_discord("events")
-            for item in eventscontent:
-                for post in jsondictionary:
-                    if str(post["reddit-id"][-6:]) in str(item):
-                        postdate = datetime.strptime(post["event-datetime"],'%Y-%m-%d %H:%M:%S')
-                        postdate = postdate.replace(hour = postdate.hour)
-                        nowdate = datetime.now()
-                        if postdate < nowdate:
-                            jsondictionary.remove(post)
-                            with open('/python/slackbot/redditevents.json', 'w') as outfile:  
-                                json.dump(jsondictionary, outfile,indent=4)
-                            r = requests.delete('https://discordapp.com/api/channels/'+discordchannels["events"]+'/messages/'+item["id"], headers=headers)
-                            post_reddit(post="aar",eventtitle=post["event-title"])
-                            with open('/python/slackbot/redditevents.json') as json_file:  
-                                jsondictionary = json.load(json_file)
-                    
+                try:
+                    command, channel = parse_slack_output(slack_client.rtm_read())
+                except:
+                    print "Connection Broken"
+                    if not restarted:
+                        restarted = True
+                        subprocess.call("/python/slackbot/cronjob.sh", shell=True)
+                        sys.exit()
+                if command and channel:
+                    handle_command(command, channel)
+                time.sleep(READ_WEBSOCKET_DELAY)
+                for submission in subreddit.new(limit=1):
+                    eventposthandle(submission)
+                    break
+                eventscontent = get_discord("events")
+                for item in eventscontent:
+                    for post in jsondictionary:
+                        if str(post["reddit-id"][-6:]) in str(item):
+                            postdate = datetime.strptime(post["event-datetime"],'%Y-%m-%d %H:%M:%S')
+                            postdate = postdate.replace(hour = postdate.hour)
+                            nowdate = datetime.now()
+                            if postdate < nowdate:
+                                jsondictionary.remove(post)
+                                with open('/python/slackbot/redditevents.json', 'w') as outfile:  
+                                    json.dump(jsondictionary, outfile,indent=4)
+                                r = requests.delete('https://discordapp.com/api/channels/'+discordchannels["events"]+'/messages/'+item["id"], headers=headers)
+                                post_reddit(post="aar",eventtitle=post["event-title"])
+                                with open('/python/slackbot/redditevents.json') as json_file:  
+                                    jsondictionary = json.load(json_file)
+            except exceptions.Exception as e:
+                log_exception(e)
+                
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
