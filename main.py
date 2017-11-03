@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 1.9.2   22/10/2017     ######
+######  VERSION 1.9.3   03/11/2017     ######
 
 """
     QUICK GLOSSARY
@@ -538,9 +538,6 @@ if __name__ == "__main__":
                                     jsondictionary = json.load(json_file)
             except exceptions.Exception as e:
                 log_exception(e)
-                if not restarted:
-                    restarted = True
-                    sys.exit()
                 
     else:
         print("Connection failed. Invalid Slack token or bot ID?")
