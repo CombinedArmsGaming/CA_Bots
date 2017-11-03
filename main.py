@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 1.8     09/10/2017     ######
+######  VERSION 1.9.3   03/11/2017     ######
 
 """
     QUICK GLOSSARY
@@ -19,6 +19,9 @@ import requests
 import json
 import re
 import sys
+import praw
+import logging
+from datetime import datetime
 
 # Loads JSON data into dictionaries from bot configuration files
 with open('/python/slackbot/botconfig.json') as data_file:    
@@ -27,14 +30,34 @@ with open('/python/slackbot/repoconfig.json') as data_file:
     repoparams = json.load(data_file)
 with open('/python/slackbot/helpfile.json') as data_file:    
     helpfile = json.load(data_file)[0]
+with open('/python/slackbot/discordconfig.json') as data_file:
+    discordchannels = json.load(data_file)[0]
+with open('/python/slackbot/redditevents.json') as json_file:  
+    jsondictionary = json.load(json_file)
+with open('/python/slackbot/redditposts.json') as json_file:  
+    postsdictionary = json.load(json_file)
 
 # Instantiate Slackbot
 BOT_ID = botparams["slack-botid"]
 slack_client = SlackClient(botparams["slack-token"])
+
+# Instantiate Reddit Bot
+reddit = praw.Reddit(client_id=botparams["reddit-client-id"],
+                     client_secret=botparams["reddit-client-secret"],
+                     password=botparams["reddit-password"],
+                     user_agent=botparams["reddit-agent"],
+                     username=botparams["reddit-username"])
+subreddit = reddit.subreddit('combinedarms')
+
 # Discord HTTP header initialisation
 headers = { "Authorization":botparams["discord-token"],
             "User-Agent":"myBotThing (http://some.url, v0.1)",
             "Content-Type":"application/json", }
+
+logging.basicConfig( filename="/python/slackbot/bot.log",
+                     filemode='w',
+                     level=logging.INFO,
+                     format= '%(asctime)s - %(levelname)s - %(message)s')
 
 # Global Variable Pre-Sanitisation
 AT_BOT = "<@" + BOT_ID + ">"
@@ -83,7 +106,10 @@ def handle_command(command, channel):
         action = str(gencmd[2])
     if command.startswith(DISCORD_COMMAND):
         msg = command.replace("discordpost", " ", 1)
-        post_discord(str(msg))
+        msgsplit = msg.split(" ")
+        msgsplit[:] = [item for item in msgsplit if item]
+        msg = msg.replace(str(msgsplit[0]), "", 1)
+        post_discord(str(msgsplit[0]),msg)
         response = ""
     if command.startswith(MODLINE_COMMAND):
         msg = command.replace("modline", "", 1)
@@ -96,29 +122,29 @@ def handle_command(command, channel):
         showmanage(str(showcmd[1]))
         response = ""
     if command.startswith(HELP_COMMAND):
-	helpmsg = command[5:]
-	helpcommand(helpmsg)
-	response = ""
+        helpmsg = command[5:]
+        helpcommand(helpmsg)
+        response = ""
     if command.startswith(WEBON_COMMAND):
         response = "This is Eagle-Six. Repositories coming live, out."
         subprocess.call("service apache2 start", shell=True)
-        post_discord("@everyone repositories are back up.")
+        post_discord("announcements","@everyone repositories are back up.")
     if command.startswith(THANKS_COMMAND):
         response = "This is Eagle-Six. Anything for Bae, over."
         subprocess.call("service apache2 start", shell=True)
     if command.startswith(WEBOFF_COMMAND):
         response = "This is Eagle-Six. Repositories going dark, out."
         subprocess.call("service apache2 stop", shell=True)
-        post_discord("@everyone repositories have been taken down for update.")
+        post_discord("announcements","@everyone repositories have been taken down for update.")
     if command.startswith(BUILD_COMMAND):
-        post_discord("Repositories have been taken down for update.")
+        post_discord("announcements","Repositories have been taken down for update.")
         repobuilder("create")
-        post_discord("@everyone repositories have been updated.")
+        post_discord("announcements","@everyone repositories have been updated.")
         response = ""
     if command.startswith(UPDATE_COMMAND):
-        post_discord("Repositories have been taken down for update.")
+        post_discord("announcements","Repositories have been taken down for update.")
         repobuilder("update")
-        post_discord("@everyone repositories have been updated.")
+        post_discord("announcements","@everyone repositories have been updated.")
         response = ""
     if command.startswith(SBUILD_COMMAND):
         repobuilder("create")
@@ -127,6 +153,20 @@ def handle_command(command, channel):
         repobuilder("update")
         response = ""
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+
+def extract_function_name():
+    tb = sys.exc_info()[-1]
+    stk = traceback.extract_tb(tb, 1)
+    fname = stk[0][3]
+    return fname
+
+def log_exception(e):
+    logging.error(
+    "Function {function_name} raised {exception_class} ({exception_docstring}): {exception_message}".format(
+    function_name = extract_function_name(),
+    exception_class = e.__class__,
+    exception_docstring = e.__doc__,
+    exception_message = e.message))
 
 def filewriter(file,string):
     # Simple filewriter that opens the file provided and overwrites the content with the string provided.
@@ -146,17 +186,66 @@ def modlinecount(repo):
     modline = set(modline)
     return (len(modline))    
 
-def post_discord(message):
+def post_discord(channel,message):
     # Load message payload
     payload =  json.dumps ( {"content":str(message)} )
     # Make HTTP request using header and payload defined earlier.
-    r = requests.post('https://discordapp.com/api/channels/'+botparams["discord-channel"]+'/messages', headers=headers, data=payload)
+    r = requests.post('https://discordapp.com/api/channels/'+discordchannels[str(channel)]+'/messages', headers=headers, data=payload)
     # Prepare error message and overwrite it if the request was successful.
     response = ("Returned error code: " + str(r.status_code))
     if r.status_code == 200:
         response = "Posted to Discord"
     # Tell everyone you've been a good boy
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    
+def get_discord(channel):
+    # Make HTTP request using header and payload defined earlier.
+    r = requests.get('https://discordapp.com/api/channels/'+discordchannels[str(channel)]+'/messages', headers=headers)
+    with open('/python/slackbot/discordmessages.json', 'w') as outfile:  
+        json.dump(r.json(), outfile,indent=4)
+    return r.json()
+
+def post_reddit(post="aar",eventtitle=""):
+    global postsdictionary
+    for item in postsdictionary:
+        if((item["postname"] == post) or ((datetime.strptime(item["nextpost"],'%Y-%m-%d %H:%M:%S')) < datetime.now())):
+            postsdictionary.remove(item)
+
+            # MAKE POST ON SUBREDDIT
+            subreddit = reddit.subreddit(item["subreddit"])
+            subreddit.submit(title=item["posttitle"]+eventtitle, selftext=item["postbody"])
+            subreddit = reddit.subreddit('combinedarms')
+
+            # CALCULATE NEXT POST TIME
+            calcpost = datetime.strptime(item["nextpost"],'%Y-%m-%d %H:%M:%S')
+            if("s" in item["postinterval"]):
+                tempval = int(re.sub("\D", "", item["postinterval"]))
+                item["nextpost"] = calcpost.replace(second = calcpost.second+tempval)
+            elif("h" in item["postinterval"]):
+                tempval = int(re.sub("\D", "", item["postinterval"]))
+                item["nextpost"] = calcpost.replace(hour = calcpost.hour+tempval)
+            elif("d" in item["postinterval"]):
+                tempval = int(re.sub("\D", "", item["postinterval"]))
+                item["nextpost"] = calcpost.replace(day = calcpost.day+tempval)
+            elif("m" in item["postinterval"]):
+                tempval = int(re.sub("\D", "", item["postinterval"]))
+                item["nextpost"] = calcpost.replace(month = calcpost.month+tempval)
+            elif("y" in item["postinterval"]):
+                tempval = int(re.sub("\D", "", item["postinterval"]))
+                item["nextpost"] = calcpost.replace(year = calcpost.year+tempval)
+            else:
+                item["nextpost"] = calcpost.replace(second = calcpost.second()+1)
+
+            item["nextpost"] = str(item["nextpost"])
+            postsdictionary.append(item)
+
+            # RELOADS POSTS DICTIONARY
+            with open('/python/slackbot/redditposts.json', 'w') as outfile:  
+                json.dump(postsdictionary, outfile,indent=4)
+            with open('/python/slackbot/redditposts.json') as json_file:  
+                postsdictionary = json.load(json_file)
+
+
 
 def repobuilder(action):
     # Sanitise action and print beginning message.
@@ -184,7 +273,7 @@ def repobuilder(action):
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 def confirmationmessage(repo,nextrepo,count,action):
-	# swifty repo.srf is created at the end of a successful repo generation. We can test for it's existence after a generation attempt to check success.
+    # swifty repo.srf is created at the end of a successful repo generation. We can test for it's existence after a generation attempt to check success.
     # Create repo.srf file path identifier
     checkfile = "/var/www/html/"+repo+"/repo.srf"
     # Check for the repo.srf file, and print the right error message.
@@ -218,7 +307,7 @@ def repochecker(repo):
     return [repofile,invfile]
 
 def showmanage(repo):
-	# Check which repo file is to be used and sanity checks it.
+    # Check which repo file is to be used and sanity checks it.
     repofile=repochecker(repo)[0]
     invfile=repochecker(repo)[1]
     if (repofile == ""):
@@ -254,7 +343,7 @@ def invlinegen(repo):
     invline = [item for item in inputline if item not in modline]
     # Generates invline string from list
     for mod in invline:
-    	invstring = (invstring + str(mod)+ ";")
+        invstring = (invstring + str(mod)+ ";")
     # Writes invline string to file
     filewriter(invfile,invstring)    
 
@@ -294,7 +383,7 @@ def modlinemanage(operation,mod,repo):
         # Prepares modstring for use, and generates modstring from list.
         modstring = ""
         for mods in modline:
-    	    modstring = (modstring + str(mods)+ ";")
+            modstring = (modstring + str(mods)+ ";")
         # Writes modstring to file.
         filewriter(repofile,modstring)
         # Generates invline file from newly updated modline.
@@ -312,7 +401,7 @@ def modlinemanage(operation,mod,repo):
         # Prepares modstring for use, and generates new modfile string. 
         modstring = ""
         for mods in modline:
-    	    modstring = (modstring + str(mods)+ ";")
+            modstring = (modstring + str(mods)+ ";")
         # Writes modline string to file.
         filewriter(repofile,modstring)
         # Generates invline from newly generated modline.
@@ -345,6 +434,58 @@ def helpcommand(command):
         response = ("I didn't understand that help request Parker. Try typing Help List for a list of possible commands.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
+def eventposthandle(submission):
+    eventstring = submission.title
+    if((eventstring.count("|")!=2) or ("]" not in eventstring) or ("[" not in eventstring)):
+        return
+    postdictionary = {"original":"","game":"","event-title":"","event-desc":"","event-datetime":"","event-host":"","event-url":"","reddit-id":""}
+    
+    ##### EATS STRINGS #####
+        
+    postdictionary["original"]=eventstring
+    postdictionary["reddit-id"]=submission.shortlink
+    postdictionary["event-host"]=str(submission.author)
+    postdictionary["event-url"]=submission.url
+        
+    # Identifies game string & enters it
+    game = eventstring.split("]")[:1]
+    game = (str(game)[4:(len(str(game))-2)])
+    postdictionary["game"] = game
+        
+    # Identifies and isolates metadata strings
+        
+    digester = eventstring.split("|")
+    blanklist = []
+        
+    stripvalue = len(game)+3
+    digester[0] = digester[0][stripvalue:]
+    for unit in digester:
+        unit = unit.strip()
+        blanklist.append(unit)
+    
+    postdictionary["event-title"]=blanklist[0]
+    postdictionary["event-desc"]=blanklist[1]
+    
+    # Parsing the date into something useful
+    blanklist[2] = blanklist[2].replace(" UTC","")
+    try:
+        blanklist[2] = datetime.strptime(blanklist[2],'%a %b%d %H%M')
+        # Apply correct year if someone schedules an event early in the next year
+        blanklist[2] = blanklist[2].replace(year = datetime.now().year)
+        if(blanklist[2].month < datetime.today().month):
+            blanklist[2] = blanklist[2].replace(year = (datetime.now().year+1))    
+        postdictionary["event-datetime"]=str(blanklist[2])
+    except:
+        postdictionary["event-datetime"]="2000-04-01 19:00:00"
+    nowdate = datetime.now()
+    postdate = datetime.strptime(postdictionary["event-datetime"],'%Y-%m-%d %H:%M:%S')
+    postdate = postdate.replace(hour = postdate.hour)
+    if (postdictionary not in jsondictionary) and (postdate > nowdate):
+        jsondictionary.append(postdictionary)
+        post_discord("events",postdictionary["event-url"])
+    with open('/python/slackbot/redditevents.json', 'w') as outfile:  
+        json.dump(jsondictionary, outfile,indent=4)
+
 def parse_slack_output(slack_rtm_output):
     """
         The Slack Real Time Messaging API is an events firehose.
@@ -366,15 +507,37 @@ if __name__ == "__main__":
         print("Operations Controller connected and running!")
         while True:
             try:
-                command, channel = parse_slack_output(slack_client.rtm_read())
-            except:
-                print "Connection Broken"
-                if not restarted:
-                    restarted = True
-                    subprocess.call("/python/slackbot/cronjob.sh", shell=True)
-                    sys.exit()
-            if command and channel:
-                handle_command(command, channel)
-            time.sleep(READ_WEBSOCKET_DELAY)
+                try:
+                    command, channel = parse_slack_output(slack_client.rtm_read())
+                except:
+                    print "Connection Broken"
+                    if not restarted:
+                        restarted = True
+                        subprocess.call("/python/slackbot/cronjob.sh", shell=True)
+                        sys.exit()
+                if command and channel:
+                    handle_command(command, channel)
+                time.sleep(READ_WEBSOCKET_DELAY)
+                for submission in subreddit.new(limit=1):
+                    eventposthandle(submission)
+                    break
+                eventscontent = get_discord("events")
+                for item in eventscontent:
+                    for post in jsondictionary:
+                        if str(post["reddit-id"][-6:]) in str(item):
+                            postdate = datetime.strptime(post["event-datetime"],'%Y-%m-%d %H:%M:%S')
+                            postdate = postdate.replace(hour = postdate.hour)
+                            nowdate = datetime.now()
+                            if postdate < nowdate:
+                                jsondictionary.remove(post)
+                                with open('/python/slackbot/redditevents.json', 'w') as outfile:  
+                                    json.dump(jsondictionary, outfile,indent=4)
+                                r = requests.delete('https://discordapp.com/api/channels/'+discordchannels["events"]+'/messages/'+item["id"], headers=headers)
+                                post_reddit(post="aar",eventtitle=post["event-title"])
+                                with open('/python/slackbot/redditevents.json') as json_file:  
+                                    jsondictionary = json.load(json_file)
+            except exceptions.Exception as e:
+                log_exception(e)
+                
     else:
         print("Connection failed. Invalid Slack token or bot ID?")

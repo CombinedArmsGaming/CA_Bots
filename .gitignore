@@ -1,2 +1,7 @@
 botconfig.json
 repoconfig.json
+discordconfig.json
+currentevents.json
+redditevents.json
+redditposts.json
+bot.log
