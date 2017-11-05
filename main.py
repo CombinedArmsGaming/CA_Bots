@@ -536,7 +536,7 @@ if __name__ == "__main__":
                                 post_reddit(post="aar",eventtitle=post["event-title"])
                                 with open('/python/slackbot/redditevents.json') as json_file:  
                                     jsondictionary = json.load(json_file)
-            except exceptions.Exception as e:
+            except Exception as e:
                 log_exception(e)
                 
     else:
