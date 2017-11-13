@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 1.9.3   03/11/2017     ######
+######  VERSION 1.9.4   13/11/2017     ######
 
 """
     QUICK GLOSSARY
@@ -154,16 +154,9 @@ def handle_command(command, channel):
         response = ""
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
-def extract_function_name():
-    tb = sys.exc_info()[-1]
-    stk = traceback.extract_tb(tb, 1)
-    fname = stk[0][3]
-    return fname
-
 def log_exception(e):
     logging.error(
-    "Function {function_name} raised {exception_class} ({exception_docstring}): {exception_message}".format(
-    function_name = extract_function_name(),
+    "Function raised {exception_class} ({exception_docstring}): {exception_message}".format(
     exception_class = e.__class__,
     exception_docstring = e.__doc__,
     exception_message = e.message))
