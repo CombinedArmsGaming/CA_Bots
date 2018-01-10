@@ -201,7 +201,7 @@ def get_discord(channel):
 def post_reddit(post="aar",eventtitle=""):
     global postsdictionary
     for item in postsdictionary:
-        if((item["postname"] == post) or ((datetime.strptime(item["nextpost"],'%Y-%m-%d %H:%M:%S')) < datetime.now())):
+        if((item["postname"] == post) and ((datetime.strptime(item["nextpost"],'%Y-%m-%d %H:%M:%S')) < datetime.now())):
             postsdictionary.remove(item)
 
             # MAKE POST ON SUBREDDIT
