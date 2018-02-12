@@ -1,6 +1,6 @@
-botconfig.json
-repoconfig.json
-discordconfig.json
+config/botconfig.json
+config/repoconfig.json
+config/discordconfig.json
 currentevents.json
 redditevents.json
 redditposts.json
