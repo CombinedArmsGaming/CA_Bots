@@ -17,7 +17,7 @@
     },
     "discordpost":{
         "name":"discordpost",
-        "helptext":"Usage: discordpost [messagecontent]\nSawyer passes the message in messagecontent to Captain Bannon who then posts it to Discord. All messagecontent passed is lower case."
+        "helptext":"Usage: discordpost [channel] [messagecontent]\nSawyer passes the message in messagecontent to Captain Bannon who then posts it to Discord channel [channel]. All messagecontent passed is lower case."
     },
     "open repo":{
         "name":"open repo",
