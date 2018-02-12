@@ -11,6 +11,10 @@
                         such that the generated repo contains all the mods in the modline
 """
 
+#############################################
+#### IMPORT STATEMENTS                   ####
+#############################################
+
 import os
 import time
 from slackclient import SlackClient
@@ -22,6 +26,10 @@ import sys
 import praw
 import logging
 from datetime import datetime
+
+#############################################
+#### LOAD JSON CONFIG DICTIONARIES       ####
+#############################################
 
 # Loads JSON data into dictionaries from bot configuration files
 with open(os.getcwd()+'/config/botconfig.json') as data_file:    
@@ -37,11 +45,18 @@ with open(os.getcwd()+'/config/redditevents.json') as json_file:
 with open(os.getcwd()+'/config/redditposts.json') as json_file:  
     redditposts = json.load(json_file)
 
-# Instantiate Slackbot
+
+#############################################
+#### INSTANTIATE SLACKBOT                ####
+#############################################
+
 BOT_ID = botparams["slack-botid"]
 slack_client = SlackClient(botparams["slack-token"])
 
-# Instantiate Reddit Bot
+#############################################
+#### REDDIT API PARAMETERS               ####
+#############################################
+
 reddit = praw.Reddit(client_id=botparams["reddit-client-id"],
                      client_secret=botparams["reddit-client-secret"],
                      password=botparams["reddit-password"],
@@ -49,17 +64,27 @@ reddit = praw.Reddit(client_id=botparams["reddit-client-id"],
                      username=botparams["reddit-username"])
 subreddit = reddit.subreddit('combinedarms')
 
-# Discord HTTP header initialisation
+#############################################
+#### DISCORD API HEADERS INIT            ####
+#############################################
+
 headers = { "Authorization":botparams["discord-token"],
             "User-Agent":"myBotThing (http://some.url, v0.1)",
             "Content-Type":"application/json", }
+
+#############################################
+#### LOGGING CONFIGURATION               ####
+#############################################
 
 logging.basicConfig( filename=os.getcwd()+"/bot.log",
                      filemode='w',
                      level=logging.INFO,
                      format= '%(asctime)s - %(levelname)s - %(message)s')
 
-# Global Variable Pre-Sanitisation
+#############################################
+#### GLOBAL VARIABLE PRE-SANITISATION    ####
+#############################################
+
 AT_BOT = "<@" + BOT_ID + ">"
 response = ""
 modline = []
@@ -67,7 +92,9 @@ invline = []
 inputline = []
 restarted = False # Used to make sure the bot only ever reinstantiates itself once before killing itself.
 
-###### COMMAND PREFIXES ######
+#############################################
+#### COMMAND PREFIXES                    ####
+#############################################
 
 # Commands relating to testing/presence
 TEST_COMMAND = "come in"
@@ -86,6 +113,17 @@ MODLINE_COMMAND = "modline"
 CHECK_COMMAND = "show"
 # Development Command
 DEV_COMMAND = "dev" 
+
+#############################################
+#############################################
+#############################################
+####                                     ####
+####          COMMAND HANDLER            ####
+####                                     ####
+#############################################
+#############################################
+#############################################
+
 
 def handle_command(command, channel):
     """
@@ -154,12 +192,20 @@ def handle_command(command, channel):
         response = ""
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
+#############################################
+#### EXCEPTION LOGGER - USED IN LOG INIT ####
+#############################################
+
 def log_exception(e):
     logging.error(
     "Function raised {exception_class} ({exception_docstring}): {exception_message}".format(
     exception_class = e.__class__,
     exception_docstring = e.__doc__,
     exception_message = e.message))
+
+#############################################
+#### FILE WRITER - FOR SAVING CONTENT    ####
+#############################################
 
 def filewriter(file,string):
     # Simple filewriter that opens the file provided and overwrites the content with the string provided.
@@ -170,6 +216,10 @@ def filewriter(file,string):
     f.write(string)
     f.close()
 
+#############################################
+#### MODLINECOUNTER FOR CONFIDENCE CHECK ####
+#############################################
+
 def modlinecount(repo):
     repofile=repochecker(repo)[0]
     with open(repofile, 'r') as f:
@@ -178,6 +228,10 @@ def modlinecount(repo):
     modline[:] = [item for item in modline if item]
     modline = set(modline)
     return (len(modline))    
+
+#############################################
+#### DISCORD TEXT OUTPUTTER W CHAN SUPPT ####
+#############################################
 
 def post_discord(channel,message):
     # Load message payload
@@ -190,6 +244,10 @@ def post_discord(channel,message):
         response = "Posted to Discord"
     # Tell everyone you've been a good boy
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+
+#############################################
+#### DISCORD CHANNEL BULK READER         ####
+#############################################
     
 def get_discord(channel):
     # Make HTTP request using header and payload defined earlier.
@@ -197,6 +255,10 @@ def get_discord(channel):
     with open(os.getcwd()+'/config/discordmessages.json', 'w') as outfile:  
         json.dump(r.json(), outfile,indent=4)
     return r.json()
+
+#############################################
+#### REDDIT POST MAKER                   ####
+#############################################
 
 def post_reddit(post="aar",eventtitle=""):
     global redditposts
@@ -238,7 +300,9 @@ def post_reddit(post="aar",eventtitle=""):
             with open(os.getcwd()+'/config/redditposts.json') as json_file:  
                 redditposts = json.load(json_file)
 
-
+#############################################
+#### REPOSITORY CONSTRUCTOR              ####
+#############################################
 
 def repobuilder(action):
     # Sanitise action and print beginning message.
@@ -265,6 +329,10 @@ def repobuilder(action):
     response = "Eagle-Six to @volc and @klima. Repositories "+action+"d. Eagle-Six out."
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
+#############################################
+#### GENS PROGRESS MESSAGES AS REPO GENS ####
+#############################################
+
 def confirmationmessage(repo,nextrepo,count,action):
     # swifty repo.srf is created at the end of a successful repo generation. We can test for it's existence after a generation attempt to check success.
     # Create repo.srf file path identifier
@@ -283,6 +351,10 @@ def confirmationmessage(repo,nextrepo,count,action):
     response = "There was a problem building "+repo+"repository. @volc should check the console output."
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
+#############################################
+#### CHECKS FOR REPO AND RETNS FILENAMES ####
+#############################################
+
 def repochecker(repo):
     if repo == "main":
         repofile = repoparams[0]["repofile"]
@@ -298,6 +370,10 @@ def repochecker(repo):
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
         return ["",""]
     return [repofile,invfile]
+
+#############################################
+#### STRING FORMAT FOR MODLINE CHECKING  ####
+#############################################
 
 def showmanage(repo):
     # Check which repo file is to be used and sanity checks it.
@@ -317,6 +393,10 @@ def showmanage(repo):
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
     response = ("And Swifty will ignore these mods: " + invstring)
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+
+#############################################
+#### GENS INVERSE MODLINES FOR STORAGE   ####
+#############################################
 
 def invlinegen(repo):
     # Prepares variables for use
@@ -339,6 +419,10 @@ def invlinegen(repo):
         invstring = (invstring + str(mod)+ ";")
     # Writes invline string to file
     filewriter(invfile,invstring)    
+
+#############################################
+#### EXEC EDIT OPERATIONS ON THE MODLINE ####
+#############################################
 
 def modlinemanage(operation,mod,repo):
     # Sets variables for chosen repository
@@ -414,6 +498,10 @@ def modlinemanage(operation,mod,repo):
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
         return None
 
+#############################################
+#### MANAGES THE HELP FUNCTION           ####
+#############################################
+
 def helpcommand(command):
     # Checks if string entered was just the word "help" and then santises it for the JSON lookup.
     if (str(command) == ""):
@@ -426,6 +514,10 @@ def helpcommand(command):
     except KeyError:
         response = ("I didn't understand that help request Parker. Try typing Help List for a list of possible commands.")
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+
+#############################################
+#### PROCESSES REDDIT EVENT POSTS        ####
+#############################################
 
 def eventposthandle(submission):
     eventstring = submission.title
@@ -479,6 +571,10 @@ def eventposthandle(submission):
     with open(os.getcwd()+'/config/redditevents.json', 'w') as outfile:  
         json.dump(redditevents, outfile,indent=4)
 
+#############################################
+#### SLACK CONTENT STRING PROCESSOR      ####
+#############################################
+
 def parse_slack_output(slack_rtm_output):
     """
         The Slack Real Time Messaging API is an events firehose.
@@ -493,6 +589,10 @@ def parse_slack_output(slack_rtm_output):
                 return output['text'].split(AT_BOT)[1].strip().lower(), \
                        output['channel']
     return None, None
+
+#############################################
+#### MAIN PROCESS THREAD                 ####
+#############################################
 
 if __name__ == "__main__":
     READ_WEBSOCKET_DELAY = 1 # 1 second delay between reading from firehose
