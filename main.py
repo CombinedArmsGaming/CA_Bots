@@ -24,18 +24,18 @@ import logging
 from datetime import datetime
 
 # Loads JSON data into dictionaries from bot configuration files
-with open('/python/slackbot/botconfig.json') as data_file:    
+with open(os.getcwd()+'/config/botconfig.json') as data_file:    
     botparams = json.load(data_file)[0]
-with open('/python/slackbot/repoconfig.json') as data_file:    
+with open(os.getcwd()+'/config/repoconfig.json') as data_file:    
     repoparams = json.load(data_file)
-with open('/python/slackbot/helpfile.json') as data_file:    
+with open(os.getcwd()+'/config/helpfile.json') as data_file:    
     helpfile = json.load(data_file)[0]
-with open('/python/slackbot/discordconfig.json') as data_file:
+with open(os.getcwd()+'/config/discordconfig.json') as data_file:
     discordchannels = json.load(data_file)[0]
-with open('/python/slackbot/redditevents.json') as json_file:  
-    jsondictionary = json.load(json_file)
-with open('/python/slackbot/redditposts.json') as json_file:  
-    postsdictionary = json.load(json_file)
+with open(os.getcwd()+'/config/redditevents.json') as json_file:  
+    redditevents = json.load(json_file)
+with open(os.getcwd()+'/config/redditposts.json') as json_file:  
+    redditposts = json.load(json_file)
 
 # Instantiate Slackbot
 BOT_ID = botparams["slack-botid"]
@@ -54,7 +54,7 @@ headers = { "Authorization":botparams["discord-token"],
             "User-Agent":"myBotThing (http://some.url, v0.1)",
             "Content-Type":"application/json", }
 
-logging.basicConfig( filename="/python/slackbot/bot.log",
+logging.basicConfig( filename=os.getcwd()+"/bot.log",
                      filemode='w',
                      level=logging.INFO,
                      format= '%(asctime)s - %(levelname)s - %(message)s')
@@ -194,15 +194,15 @@ def post_discord(channel,message):
 def get_discord(channel):
     # Make HTTP request using header and payload defined earlier.
     r = requests.get('https://discordapp.com/api/channels/'+discordchannels[str(channel)]+'/messages', headers=headers)
-    with open('/python/slackbot/discordmessages.json', 'w') as outfile:  
+    with open(os.getcwd()+'/config/discordmessages.json', 'w') as outfile:  
         json.dump(r.json(), outfile,indent=4)
     return r.json()
 
 def post_reddit(post="aar",eventtitle=""):
-    global postsdictionary
-    for item in postsdictionary:
+    global redditposts
+    for item in redditposts:
         if((item["postname"] == post) and ((datetime.strptime(item["nextpost"],'%Y-%m-%d %H:%M:%S')) < datetime.now())):
-            postsdictionary.remove(item)
+            redditposts.remove(item)
 
             # MAKE POST ON SUBREDDIT
             subreddit = reddit.subreddit(item["subreddit"])
@@ -230,13 +230,13 @@ def post_reddit(post="aar",eventtitle=""):
                 item["nextpost"] = calcpost.replace(second = calcpost.second()+1)
 
             item["nextpost"] = str(item["nextpost"])
-            postsdictionary.append(item)
+            redditposts.append(item)
 
             # RELOADS POSTS DICTIONARY
-            with open('/python/slackbot/redditposts.json', 'w') as outfile:  
-                json.dump(postsdictionary, outfile,indent=4)
-            with open('/python/slackbot/redditposts.json') as json_file:  
-                postsdictionary = json.load(json_file)
+            with open(os.getcwd()+'/config/redditposts.json', 'w') as outfile:  
+                json.dump(redditposts, outfile,indent=4)
+            with open(os.getcwd()+'/config/redditposts.json') as json_file:  
+                redditposts = json.load(json_file)
 
 
 
@@ -473,11 +473,11 @@ def eventposthandle(submission):
     nowdate = datetime.now()
     postdate = datetime.strptime(postdictionary["event-datetime"],'%Y-%m-%d %H:%M:%S')
     postdate = postdate.replace(hour = postdate.hour)
-    if (postdictionary not in jsondictionary) and (postdate > nowdate):
-        jsondictionary.append(postdictionary)
+    if (postdictionary not in redditevents) and (postdate > nowdate):
+        redditevents.append(postdictionary)
         post_discord("events",postdictionary["event-url"])
-    with open('/python/slackbot/redditevents.json', 'w') as outfile:  
-        json.dump(jsondictionary, outfile,indent=4)
+    with open(os.getcwd()+'/config/redditevents.json', 'w') as outfile:  
+        json.dump(redditevents, outfile,indent=4)
 
 def parse_slack_output(slack_rtm_output):
     """
@@ -506,7 +506,7 @@ if __name__ == "__main__":
                     print "Connection Broken"
                     if not restarted:
                         restarted = True
-                        subprocess.call("/python/slackbot/cronjob.sh", shell=True)
+                        subprocess.call(os.getcwd()+'/cronjob.sh', shell=True)
                         sys.exit()
                 if command and channel:
                     handle_command(command, channel)
@@ -516,19 +516,19 @@ if __name__ == "__main__":
                     break
                 eventscontent = get_discord("events")
                 for item in eventscontent:
-                    for post in jsondictionary:
+                    for post in redditevents:
                         if str(post["reddit-id"][-6:]) in str(item):
                             postdate = datetime.strptime(post["event-datetime"],'%Y-%m-%d %H:%M:%S')
                             postdate = postdate.replace(hour = postdate.hour)
                             nowdate = datetime.now()
                             if postdate < nowdate:
-                                jsondictionary.remove(post)
-                                with open('/python/slackbot/redditevents.json', 'w') as outfile:  
-                                    json.dump(jsondictionary, outfile,indent=4)
+                                redditevents.remove(post)
+                                with open(os.getcwd()+'/config/redditevents.json', 'w') as outfile:  
+                                    json.dump(redditevents, outfile,indent=4)
                                 r = requests.delete('https://discordapp.com/api/channels/'+discordchannels["events"]+'/messages/'+item["id"], headers=headers)
                                 post_reddit(post="aar",eventtitle=post["event-title"])
-                                with open('/python/slackbot/redditevents.json') as json_file:  
-                                    jsondictionary = json.load(json_file)
+                                with open(os.getcwd()+'/config/redditevents.json') as json_file:  
+                                    redditevents = json.load(json_file)
             except Exception as e:
                 log_exception(e)
                 
