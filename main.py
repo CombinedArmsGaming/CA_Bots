@@ -131,16 +131,13 @@ def handle_command(command, channel):
         are valid commands. If so, then acts on the commands. If not,
         returns back what it needs for clarification.
     """
-    response = "I need more information to allocate additional fire support Parker, try the help command if you need to call for additional support."
     if command.startswith(TEST_COMMAND):
-        response = "This is Eagle-Six. What do you need?"
+        slackreply("This is Eagle-Six. What do you need?")
     elif command.startswith(DEV_COMMAND):
-        response = "This is Eagle-Six. Developer command received."
-        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        slackreply("This is Eagle-Six. Developer command received.")
         msg = command.replace("dev", "", 1)
         gencmd = msg.split(" ")
         subprocess.call("repogen.sh "+gencmd[1]+" "+gencmd[2], shell=True)
-        response = ""
         action = str(gencmd[2])
     elif command.startswith(DISCORD_COMMAND):
         msg = command.replace("discordpost", " ", 1)
@@ -148,49 +145,42 @@ def handle_command(command, channel):
         msgsplit[:] = [item for item in msgsplit if item]
         msg = msg.replace(str(msgsplit[0]), "", 1)
         post_discord(str(msgsplit[0]),msg)
-        response = ""
     elif command.startswith(MODLINE_COMMAND):
         msg = command.replace("modline", "", 1)
         modcmd = msg.split(" ")
         modlinemanage(str(modcmd[1]),str(modcmd[2]),str(modcmd[3]))
-        response = ""
     elif command.startswith(CHECK_COMMAND):
         msg = command.replace("show", "", 1)
         showcmd = msg.split(" ")
         showmanage(str(showcmd[1]))
-        response = ""
     elif command.startswith(HELP_COMMAND):
         helpmsg = command[5:]
         helpcommand(helpmsg)
-        response = ""
     elif command.startswith(WEBON_COMMAND):
-        response = "This is Eagle-Six. Repositories coming live, out."
+        slackreply("This is Eagle-Six. Repositories coming live, out.")
         subprocess.call("service apache2 start", shell=True)
         post_discord("announcements","@everyone repositories are back up.")
     elif command.startswith(THANKS_COMMAND):
-        response = "This is Eagle-Six. Anything for Bae, over."
+        slackreply("This is Eagle-Six. Anything for Bae, over.")
         subprocess.call("service apache2 start", shell=True)
     elif command.startswith(WEBOFF_COMMAND):
-        response = "This is Eagle-Six. Repositories going dark, out."
+        slackreply("This is Eagle-Six. Repositories going dark, out.")
         subprocess.call("service apache2 stop", shell=True)
         post_discord("announcements","@everyone repositories have been taken down for update.")
     elif command.startswith(BUILD_COMMAND):
         post_discord("announcements","Repositories have been taken down for update.")
         repobuilder("create")
         post_discord("announcements","@everyone repositories have been updated.")
-        response = ""
     elif command.startswith(UPDATE_COMMAND):
         post_discord("announcements","Repositories have been taken down for update.")
         repobuilder("update")
         post_discord("announcements","@everyone repositories have been updated.")
-        response = ""
     elif command.startswith(SBUILD_COMMAND):
         repobuilder("create")
-        response = ""
     elif command.startswith(SUPDATE_COMMAND):
         repobuilder("update")
-        response = ""
-    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    else:
+    	slackreply("I need more information to allocate additional fire support Parker, try the help command if you need to call for additional support.")
 
 #############################################
 #### EXCEPTION LOGGER - USED IN LOG INIT ####
@@ -207,7 +197,7 @@ def log_exception(e):
 #### SLACK MESSAGE SENDER                ####
 #############################################
 
-def slackreply(response=""):
+def slackreply(response):
 	slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 #############################################
@@ -246,11 +236,11 @@ def post_discord(channel,message):
     # Make HTTP request using header and payload defined earlier.
     r = requests.post('https://discordapp.com/api/channels/'+discordchannels[str(channel)]+'/messages', headers=headers, data=payload)
     # Prepare error message and overwrite it if the request was successful.
-    response = ("Returned error code: " + str(r.status_code))
+    slackreply(("Returned error code: " + str(r.status_code)))
     if r.status_code == 200:
-        response = "Posted to Discord"
-    # Tell everyone you've been a good boy
-    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    	# Tell everyone you've been a good boy
+        slackreply("Posted to Discord")
+
 
 #############################################
 #### DISCORD CHANNEL BULK READER         ####
@@ -314,8 +304,7 @@ def post_reddit(post="aar",eventtitle=""):
 def repobuilder(action):
     # Sanitise action and print beginning message.
     action = str(action)
-    response = "This is Eagle-Six to all units. Message received, "+action+" all repositories in succession. Starting Main Repository now, over. (0/3)"
-    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    slackreply(("This is Eagle-Six to all units. Message received, "+action+" all repositories in succession. Starting Main Repository now, over. (0/3)"))
     # Ensure that all invlines are generated correctly before startup.
     invlinegen("main")
     invlinegen("ww2")
@@ -333,8 +322,7 @@ def repobuilder(action):
     subprocess.call("repogen.sh test "+action, shell=True)
     confirmationmessage("test","fin","3",action)
     # Print confirmation message.
-    response = "Eagle-Six to @volc and @klima. Repositories "+action+"d. Eagle-Six out."
-    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    slackreply(("Eagle-Six to @volc and @klima. Repositories "+action+"d. Eagle-Six out."))
 
 #############################################
 #### GENS PROGRESS MESSAGES AS REPO GENS ####
@@ -347,16 +335,13 @@ def confirmationmessage(repo,nextrepo,count,action):
     # Check for the repo.srf file, and print the right error message.
     if os.path.isfile(checkfile):
         if (nextrepo != "fin"):
-            response = "This is Eagle-Six. "+repo+" repository "+action+"d ("+(str(modlinecount(repo)))+" mods). Starting "+nextrepo+" Repository ("+(str(modlinecount(nextrepo)))+" mods), over. ("+str(count)+"/3)"
-            slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+            slackreply(("This is Eagle-Six. "+repo+" repository "+action+"d ("+(str(modlinecount(repo)))+" mods). Starting "+nextrepo+" Repository ("+(str(modlinecount(nextrepo)))+" mods), over. ("+str(count)+"/3)"))
             return None
         if (nextrepo == "fin"):
-            response = "This is Eagle-Six. "+repo+" repository "+action+"d ("+(str(modlinecount(repo)))+" mods). ("+str(count)+"/3)"
-            slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+            slackreply(("This is Eagle-Six. "+repo+" repository "+action+"d ("+(str(modlinecount(repo)))+" mods). ("+str(count)+"/3)"))
             return None
     # Print error message if repo.srf doesn't exist.
-    response = "There was a problem building "+repo+"repository. @volc should check the console output."
-    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    slackreply(("There was a problem building "+repo+"repository. @volc should check the console output."))
 
 #############################################
 #### CHECKS FOR REPO AND RETNS FILENAMES ####
@@ -373,8 +358,7 @@ def repochecker(repo):
         repofile = repoparams[2]["repofile"]
         invfile = repoparams[2]["invfile"]
     if (repo != "main") and (repo != "ww2") and (repo != "test"):
-        response = ("Parker, that repository wasn't recognised. Try again, over.")
-        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        slackreply("Parker, that repository wasn't recognised. Try again, over.")
         return ["",""]
     return [repofile,invfile]
 
@@ -387,8 +371,7 @@ def showmanage(repo):
     repofile=repochecker(repo)[0]
     invfile=repochecker(repo)[1]
     if (repofile == ""):
-        response = ("Parker, Bannon has made a mistake in the above command. Make sure it gets corrected.")
-        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        slackreply("Parker, Bannon has made a mistake in the above command. Make sure it gets corrected.")
         return None
     # Open files if they exist and load the contents.
     with open(repofile, 'r') as f:
@@ -396,10 +379,8 @@ def showmanage(repo):
     with open(invfile, 'r') as f:
         invstring = f.readline()
     # Print the contents of the files.
-    response = ("Parker. The " + repo + "repository contains these "+str(modlinecount(repo))+" mods: " + modstring)
-    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
-    response = ("And Swifty will ignore these mods: " + invstring)
-    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+    slackreply(("Parker. The " + repo + "repository contains these "+str(modlinecount(repo))+" mods: " + modstring))
+    slackreply(("And Swifty will ignore these mods: " + invstring))
 
 #############################################
 #### GENS INVERSE MODLINES FOR STORAGE   ####
@@ -448,8 +429,7 @@ def modlinemanage(operation,mod,repo):
     # Exit if no repo is selected by repochecker, the mod doesn't begin with an @, or the modfolder doesn't exist in the upload folder.
     # As anything can be used for an update command, ignore the tests for folder existing and beginniner with an @ if the command is to do an update.
     if ((repofile == "") or (exist != True) or (item[0][:1] != "@")) and ((operation != "update") or (repofile == "")):
-        response = ("Parker, Bannon has made a mistake in the above command. Make sure it gets corrected. Perhaps the mod folder hasn't been uploaded or the syntax is wrong.")
-        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        slackreply("Parker, Bannon has made a mistake in the above command. Make sure it gets corrected. Perhaps the mod folder hasn't been uploaded or the syntax is wrong.")
         return None
 
     # Reads in all the mods in the chosen modline and seperates them into a list 
@@ -473,8 +453,7 @@ def modlinemanage(operation,mod,repo):
         # Generates invline file from newly updated modline.
         invlinegen(str(repo))
         # ...and tells you what it's done.
-        response = ("Added " + mod + " to " + repo + " modline, over. (now "+(str(modlinecount(repo)))+" mods)")
-        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        slackreply(("Added " + mod + " to " + repo + " modline, over. (now "+(str(modlinecount(repo)))+" mods)"))
     if operation == "remove":
         # Generates new modline by regenerating modline and omitting mods that match the one being removed.
         gen = [mod]
@@ -491,18 +470,15 @@ def modlinemanage(operation,mod,repo):
         # Generates invline from newly generated modline.
         invlinegen(str(repo))
         # Then tells everyone it's a clever boy.
-        response = ("Removed " + mod + " from " + repo + " modline, over. (now "+(str(modlinecount(repo)))+" mods)")
-        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        slackreply(("Removed " + mod + " from " + repo + " modline, over. (now "+(str(modlinecount(repo)))+" mods)"))
     if operation == "update":
         # Doesn't give a damn, just generates an invline.
         invlinegen(str(repo))
         # Tells you it's done it.
-        response = ("Updated " + repo + " modline, over.")
-        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        slackreply(("Updated " + repo + " modline, over."))
     if (operation != "add") and (operation != "remove") and (operation != "update"):
         # Chastises you for being silly
-        response = ("Parker, I need to know what to do to the modline. Try telling me to add remove or update the modline.")
-        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        slackreply("Parker, I need to know what to do to the modline. Try telling me to add remove or update the modline.")
         return None
 
 #############################################
@@ -515,12 +491,10 @@ def helpcommand(command):
         command = "help"
     # tries/catches to check the helpfile for a key entry that matches the user request
     try:
-        response = (str(helpfile[command]["helptext"]))
-        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        slackreply((str(helpfile[command]["helptext"])))
     # handles moron users
     except KeyError:
-        response = ("I didn't understand that help request Parker. Try typing Help List for a list of possible commands.")
-        slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
+        slackreply("I didn't understand that help request Parker. Try typing Help List for a list of possible commands.")
 
 #############################################
 #### PROCESSES REDDIT EVENT POSTS        ####
