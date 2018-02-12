@@ -134,7 +134,7 @@ def handle_command(command, channel):
     response = "I need more information to allocate additional fire support Parker, try the help command if you need to call for additional support."
     if command.startswith(TEST_COMMAND):
         response = "This is Eagle-Six. What do you need?"
-    if command.startswith(DEV_COMMAND):
+    elif command.startswith(DEV_COMMAND):
         response = "This is Eagle-Six. Developer command received."
         slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
         msg = command.replace("dev", "", 1)
@@ -142,52 +142,52 @@ def handle_command(command, channel):
         subprocess.call("repogen.sh "+gencmd[1]+" "+gencmd[2], shell=True)
         response = ""
         action = str(gencmd[2])
-    if command.startswith(DISCORD_COMMAND):
+    elif command.startswith(DISCORD_COMMAND):
         msg = command.replace("discordpost", " ", 1)
         msgsplit = msg.split(" ")
         msgsplit[:] = [item for item in msgsplit if item]
         msg = msg.replace(str(msgsplit[0]), "", 1)
         post_discord(str(msgsplit[0]),msg)
         response = ""
-    if command.startswith(MODLINE_COMMAND):
+    elif command.startswith(MODLINE_COMMAND):
         msg = command.replace("modline", "", 1)
         modcmd = msg.split(" ")
         modlinemanage(str(modcmd[1]),str(modcmd[2]),str(modcmd[3]))
         response = ""
-    if command.startswith(CHECK_COMMAND):
+    elif command.startswith(CHECK_COMMAND):
         msg = command.replace("show", "", 1)
         showcmd = msg.split(" ")
         showmanage(str(showcmd[1]))
         response = ""
-    if command.startswith(HELP_COMMAND):
+    elif command.startswith(HELP_COMMAND):
         helpmsg = command[5:]
         helpcommand(helpmsg)
         response = ""
-    if command.startswith(WEBON_COMMAND):
+    elif command.startswith(WEBON_COMMAND):
         response = "This is Eagle-Six. Repositories coming live, out."
         subprocess.call("service apache2 start", shell=True)
         post_discord("announcements","@everyone repositories are back up.")
-    if command.startswith(THANKS_COMMAND):
+    elif command.startswith(THANKS_COMMAND):
         response = "This is Eagle-Six. Anything for Bae, over."
         subprocess.call("service apache2 start", shell=True)
-    if command.startswith(WEBOFF_COMMAND):
+    elif command.startswith(WEBOFF_COMMAND):
         response = "This is Eagle-Six. Repositories going dark, out."
         subprocess.call("service apache2 stop", shell=True)
         post_discord("announcements","@everyone repositories have been taken down for update.")
-    if command.startswith(BUILD_COMMAND):
+    elif command.startswith(BUILD_COMMAND):
         post_discord("announcements","Repositories have been taken down for update.")
         repobuilder("create")
         post_discord("announcements","@everyone repositories have been updated.")
         response = ""
-    if command.startswith(UPDATE_COMMAND):
+    elif command.startswith(UPDATE_COMMAND):
         post_discord("announcements","Repositories have been taken down for update.")
         repobuilder("update")
         post_discord("announcements","@everyone repositories have been updated.")
         response = ""
-    if command.startswith(SBUILD_COMMAND):
+    elif command.startswith(SBUILD_COMMAND):
         repobuilder("create")
         response = ""
-    if command.startswith(SUPDATE_COMMAND):
+    elif command.startswith(SUPDATE_COMMAND):
         repobuilder("update")
         response = ""
     slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
@@ -202,6 +202,13 @@ def log_exception(e):
     exception_class = e.__class__,
     exception_docstring = e.__doc__,
     exception_message = e.message))
+
+#############################################s
+#### SLACK MESSAGE SENDER                ####
+#############################################
+
+def slackreply(response=""):
+	slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 #############################################
 #### FILE WRITER - FOR SAVING CONTENT    ####
