@@ -26,7 +26,7 @@ import requests
 from discord import post_discord, get_discord
 from reddit import post_reddit, eventposthandle
 from repo import repobuilder, modlinemanage, showmanage
-from globalvar import channel, helpfile, discordchannels, redditevents, slack_client, AT_BOT, restarted, prefixes, subreddit, headers, slackreply
+from globalvar import helpfile, discordchannels, redditevents, slack_client, AT_BOT, restarted, prefixes, subreddit, headers, slackreply
 
 #############################################
 #### LOGGING CONFIGURATION               ####

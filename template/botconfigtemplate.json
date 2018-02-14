@@ -3,6 +3,7 @@
         "name":"",
         "slack-token":"",
         "slack-botid":"",
+        "slack-channel":"",
         "discord-token":"",
         "reddit-client-id":"",
         "reddit-client-secret":"",

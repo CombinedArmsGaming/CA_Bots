@@ -14,6 +14,7 @@ from slackclient import SlackClient
 #############################################
 
 # Loads JSON data into dictionaries from bot configuration files
+
 with open(os.getcwd()+'/config/botconfig.json') as data_file:
     botparams = json.load(data_file)[0]
 with open(os.getcwd()+'/config/repoconfig.json') as data_file:
@@ -31,7 +32,6 @@ with open(os.getcwd()+'/config/redditposts.json') as json_file:
 #### INSTANTIATE SLACKBOT                ####
 #############################################
 
-channel = ""
 BOT_ID = botparams["slack-botid"]
 slack_client = SlackClient(botparams["slack-token"])
 
@@ -92,7 +92,6 @@ headers = {"Authorization":botparams["discord-token"],
 #############################################
 
 def slackreply(response):
-    slack_client.api_call("chat.postMessage", channel=channel, text=response, as_user=True)
 
 #############################################
 #### FILE WRITER - FOR SAVING CONTENT    ####
