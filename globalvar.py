@@ -92,6 +92,7 @@ headers = {"Authorization":botparams["discord-token"],
 #############################################
 
 def slackreply(response):
+    slack_client.api_call("chat.postMessage", channel=botparams["slack-channel"], text=response, as_user=True)
 
 #############################################
 #### FILE WRITER - FOR SAVING CONTENT    ####
