@@ -22,8 +22,9 @@ def post_discord(channel, message):
     url = ('https://discordapp.com/api/channels/'+discordchannels[str(channel)]+'/messages')
     make_req = requests.post(url, headers=headers, data=payload)
     # Prepare error message and overwrite it if the request was successful.
-    slackreply(("Returned error code: " + str(make_req.status_code)))
-    if make_req.status_code == 200:
+    if make_req.status_code != 200:
+        slackreply(("Returned error code: " + str(make_req.status_code)))
+    elif make_req.status_code == 200:
     	# Tell everyone you've been a good boy
         slackreply("Posted to Discord")
 
