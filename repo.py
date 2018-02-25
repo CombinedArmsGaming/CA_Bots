@@ -1,10 +1,11 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VER INFO IN MAIN.PY 13/2/2018  ######
+######  VER INFO IN MAIN.PY 25/2/2018  ######
 
 '''This module contains all the repository management functions'''
 
+from __future__ import absolute_import
 import os
 import subprocess
 from globalvar import filewriter, slackreply, botparams, repoparams
@@ -21,7 +22,7 @@ def modlinecount(repo):
     modline = modstring.split(";")
     modline[:] = [item for item in modline if item]
     modline = set(modline)
-    return (len(modline))
+    return len(modline)
 
 #############################################
 #### REPOSITORY CONSTRUCTOR              ####

@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 1.9.4   13/02/2018     ######
+######  VERSION 1.9.5   25/02/2018     ######
 
 """
     QUICK GLOSSARY
@@ -15,6 +15,7 @@
 #### IMPORT STATEMENTS                   ####
 #############################################
 
+from __future__ import absolute_import
 import os
 import time
 import subprocess
@@ -157,13 +158,13 @@ def parse_slack_output(slack_rtm_output):
 if __name__ == "__main__":
     READ_WEBSOCKET_DELAY = 1 # 1 second delay between reading from firehose
     if slack_client.rtm_connect():
-        print "Operations Controller connected and running!"
+        print("Operations Controller connected and running!")
         while True:
             try:
                 try:
                     command, channel = parse_slack_output(slack_client.rtm_read())
                 except:
-                    print "Connection Broken"
+                    print("Connection Broken")
                     if not restarted:
                         restarted = True
                         subprocess.call(os.getcwd()+'/cronjob.sh', shell=True)
@@ -193,4 +194,4 @@ if __name__ == "__main__":
                 log_exception(e)
 
     else:
-        print "Connection failed. Invalid Slack token or bot ID?"
+        print("Connection failed. Invalid Slack token or bot ID?")
