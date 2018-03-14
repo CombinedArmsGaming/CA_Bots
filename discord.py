@@ -40,5 +40,5 @@ def get_discord(channel):
     url = ('https://discordapp.com/api/channels/'+discordchannels[str(channel)]+'/messages')
     make_req = requests.get(url, headers=headers)
     with open(os.getcwd()+'/config/discordmessages.json', 'w') as outfile:
-        json.dump(make_req.json(), outfile, indent=4)
+        json.dumps(make_req.json(), outfile, indent=4)
     return make_req.json()
