@@ -179,10 +179,12 @@ if __name__ == "__main__":
                 for item in eventscontent:
                     for post in redditevents:
                         if str(post["reddit-id"][-6:]) in str(item):
+                            print("found"+post["reddit-id"])
                             postdate = datetime.strptime(post["event-datetime"], '%Y-%m-%d %H:%M:%S')
                             postdate = postdate.replace(hour=postdate.hour)
                             nowdate = datetime.now()
                             if postdate < nowdate:
+                                print("it")
                                 redditevents.remove(post)
                                 with open(os.getcwd()+'/config/redditevents.json', 'w') as outfile:
                                     json.dump(redditevents, outfile, indent=4)
