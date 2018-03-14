@@ -25,9 +25,9 @@ with open(os.getcwd()+'/config/helpfile.json') as data_file:
 with open(os.getcwd()+'/config/discordconfig.json') as data_file:
     discordchannels = json.load(data_file)[0]
 with open(os.getcwd()+'/config/redditevents.json') as json_file:
-    redditevents = json.load(json_file)
+    redditevents = json.loads(json_file)
 with open(os.getcwd()+'/config/redditposts.json') as json_file:
-    redditposts = json.loads(json_file)
+    redditposts = json.load(json_file)
 
 #############################################
 #### INSTANTIATE SLACKBOT                ####
