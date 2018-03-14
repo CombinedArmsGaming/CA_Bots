@@ -115,7 +115,7 @@ def log_exception(e):
         "Function raised {exception_class} ({exception_docstring}): {exception_message}".format(
             exception_class=e.__class__,
             exception_docstring=e.__doc__,
-            exception_message=e.message))
+            exception_message=str(e)))
 
 #############################################
 #### MANAGES THE HELP FUNCTION           ####
