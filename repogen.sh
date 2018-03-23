@@ -12,7 +12,7 @@ paramfile="/repository/storage/$1""ignore"
 read -r params<$paramfile
 #
 #wipe repository folder
-if [ "$2" == "create" ]; then rm -rf /var/www/html/$1; fi
+if [ "$2" == "create" ]; then rm -rf /repository/www/$1; fi
 #
 #prepare blank repository settings for generation
 cd /repository/input
@@ -25,7 +25,7 @@ cp "/repository/storage/$1""repo.png" repo.png
 #
 #generate repository
 cd /repository/tools
-mono swifty-cli.exe $2 ../input /var/www/html/$1 -ignore "$params"
+mono swifty-cli.exe $2 ../input /repository/www/$1 -ignore "$params"
 #
 #prepare blank repository settings for generation
 cd /repository/input
