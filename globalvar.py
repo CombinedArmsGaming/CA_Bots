@@ -61,9 +61,7 @@ prefixes = {# Commands relating to testing/presence
     "WEBON_COMMAND":"open repo",
     "WEBOFF_COMMAND":"close repo",
     "BUILD_COMMAND":"build repo",
-    "UPDATE_COMMAND":"update repo",
     "SBUILD_COMMAND":"stealth build",
-    "SUPDATE_COMMAND":"stealth update",
     "MODLINE_COMMAND":"modline",
     "CHECK_COMMAND":"show",
     # Development Command
