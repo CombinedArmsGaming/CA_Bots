@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 1.9.5   25/02/2018     ######
+######  VERSION 2.0.0   25/02/2018     ######
 
 """
     QUICK GLOSSARY
@@ -84,25 +84,19 @@ def handle_command(command, channel):
         slackreply("This is Eagle-Six. Repositories coming live, out.")
         subprocess.call("service apache2 start", shell=True)
         post_discord("announcements", "@everyone repositories are back up.")
-    elif command.startswith(prefixes["THANKS_COMMAND"]):
-        slackreply("This is Eagle-Six. Anything for Bae, over.")
-        subprocess.call("service apache2 start", shell=True)
     elif command.startswith(prefixes["WEBOFF_COMMAND"]):
         slackreply("This is Eagle-Six. Repositories going dark, out.")
         subprocess.call("service apache2 stop", shell=True)
+    elif command.startswith(prefixes["THANKS_COMMAND"]):
+        slackreply("This is Eagle-Six. Anything for Bae, over.")
+        subprocess.call("service apache2 start", shell=True)
         post_discord("announcements", "@everyone repositories have been taken down for update.")
     elif command.startswith(prefixes["BUILD_COMMAND"]):
         post_discord("announcements", "Repositories have been taken down for update.")
         repobuilder("create")
         post_discord("announcements", "@everyone repositories have been updated.")
-    elif command.startswith(prefixes["UPDATE_COMMAND"]):
-        post_discord("announcements", "Repositories have been taken down for update.")
-        repobuilder("update")
-        post_discord("announcements", "@everyone repositories have been updated.")
     elif command.startswith(prefixes["SBUILD_COMMAND"]):
         repobuilder("create")
-    elif command.startswith(prefixes["SUPDATE_COMMAND"]):
-        repobuilder("update")
     else:
         slackreply("I need more information to allocate additional fire support Parker, try the help command if you need to call for additional support.")
 
