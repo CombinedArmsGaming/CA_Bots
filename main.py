@@ -59,10 +59,6 @@ def handle_command(command, channel):
         slackreply("This is Eagle-Six. What do you need?")
     elif command.startswith(prefixes["DEV_COMMAND"]):
         slackreply("This is Eagle-Six. Developer command received.")
-        #msg = command.replace("dev", "", 1)
-        #gencmd = msg.split(" ")
-        #subprocess.call("repogen.sh "+gencmd[1]+" "+gencmd[2], shell=True)
-        #action = str(gencmd[2])
     elif command.startswith(prefixes["DISCORD_COMMAND"]):
         msg = command.replace("discordpost", " ", 1)
         msgsplit = msg.split(" ")
@@ -93,10 +89,10 @@ def handle_command(command, channel):
         post_discord("announcements", "@everyone repositories have been taken down for update.")
     elif command.startswith(prefixes["BUILD_COMMAND"]):
         post_discord("announcements", "Repositories have been taken down for update.")
-        repobuilder("create")
+        repobuilder()
         post_discord("announcements", "@everyone repositories have been updated.")
     elif command.startswith(prefixes["SBUILD_COMMAND"]):
-        repobuilder("create")
+        repobuilder()
     else:
         slackreply("I need more information to allocate additional fire support Parker, try the help command if you need to call for additional support.")
 

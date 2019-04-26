@@ -28,50 +28,31 @@ def modlinecount(repo):
 #### REPOSITORY CONSTRUCTOR              ####
 #############################################
 
-def repobuilder(action):
+def repobuilder():
     '''This function handles the repository construction'''
     # Sanitise action and print beginning message.
-    action = str(action)
-    slackreply(("This is Eagle-Six to all units. Message received, "+action+" all repositories in succession. Starting Main Repository now, over. (0/3)"))
-    # Ensure that all invlines are generated correctly before startup.
-    invlinegen("main")
-    invlinegen("ww2")
-    invlinegen("test")
-    # GENERATE MAIN
-    showmanage("main")
-    subprocess.call("repogen.sh main "+action, shell=True)
-    confirmationmessage("main", "ww2", "1", action)
-    # GENERATE WW2
-    showmanage("ww2")
-    subprocess.call("repogen.sh ww2 "+action, shell=True)
-    confirmationmessage("ww2", "test", "2", action)
-    # GENERATE TEST
-    showmanage("test")
-    subprocess.call("repogen.sh test "+action, shell=True)
-    confirmationmessage("test", "fin", "3", action)
+    slackreply(("This is Eagle-Six to all units. Message received, build all repositories in succession, over."))
+    for repo in repoparams:
+        showmanage(str(repo["name"]))
+        subprocess.call("r3pogen.sh "+str(repo["name"]), shell=True)
+        confirmationmessage(str(repo["name"]))
     # Print confirmation message.
-    slackreply(("Eagle-Six to @volc and @klima. Repositories "+action+"d. Eagle-Six out."))
+    slackreply(("Eagle-Six to @volc and @klima. Repositories built. Eagle-Six out."))
 
 #############################################
-#### GENS PROGRESS MESSAGES AS REPO GENS ####
+####  GENS ERROR MESSAGES AS REPO GENS   ####
 #############################################
 
-def confirmationmessage(repo, nextrepo, count, action):
-    '''Formats and prints mid-repository construction updates to Slack'''
+def confirmationmessage(repo):
+    '''Formats and prints mid-repository construction updates to Slack.'''
     # swifty repo.srf is created at the end of a successful repo generation.
     # We can test for it's existence after a generation attempt to check success.
-    # Create repo.srf file path identifier
-    checkfile = "/var/www/html/"+repo+"/repo.srf"
+    # Create repo.json file path identifier
+    checkfile = "/var/www/html/"+repo+"/repo.json"
     # Check for the repo.srf file, and print the right error message.
-    if os.path.isfile(checkfile):
-        if nextrepo != "fin":
-            slackreply(("This is Eagle-Six. "+repo+" repository "+action+"d ("+(str(modlinecount(repo)))+" mods). Starting "+nextrepo+" Repository ("+(str(modlinecount(nextrepo)))+" mods), over. ("+str(count)+"/3)"))
-            return None
-        if nextrepo == "fin":
-            slackreply(("This is Eagle-Six. "+repo+" repository "+action+"d ("+(str(modlinecount(repo)))+" mods). ("+str(count)+"/3)"))
-            return None
-    # Print error message if repo.srf doesn't exist.
-    slackreply(("There was a problem building "+repo+"repository. @volc should check the console output."))
+    if !(os.path.isfile(checkfile)):
+        # Print error message if repo.json doesn't exist.
+        slackreply(("There was a problem building "+repo+"repository. @volc should check the console output."))
     return None
 
 #############################################
