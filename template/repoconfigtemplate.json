@@ -1,17 +1,11 @@
 [
     {
-        "name":"main",
-        "repojson":"",
-        "repopng":""
+        "name":"main"
     },
     {
-        "name":"ww2",
-        "repojson":"",
-        "repopng":""
+        "name":"ww2"
     },
     {
-        "name":"test",
-        "repojson":"",
-        "repopng":""
+        "name":"test"
     }
 ]

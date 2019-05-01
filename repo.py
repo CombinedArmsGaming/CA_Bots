@@ -8,7 +8,7 @@
 from __future__ import absolute_import
 import os
 import subprocess
-from globalvar import filewriter, slackreply, botparams, repoparams
+from globalvar import slackreply, botparams, repoparams
 
 #############################################
 #### REPOSITORY CONSTRUCTOR              ####
