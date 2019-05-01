@@ -19,6 +19,7 @@ def repobuilder():
     # Sanitise action and print beginning message.
     slackreply(("This is Eagle-Six to all units. Message received, build all repositories in succession, over."))
     for r in repoparams:
+        showmods(str(r["name"])
         subprocess.call("r3pogen.sh "+str(r["name"]), shell=True)
         confirmationmessage(str(r["name"]))
     # Print confirmation message.
@@ -33,12 +34,36 @@ def confirmationmessage(repo):
     # swifty repo.srf is created at the end of a successful repo generation.
     # We can test for it's existence after a generation attempt to check success.
     # Create repo.json file path identifier
-    checkfile = "/var/www/html/"+repo+"/repo.json"
+    checkfile = "/var/www/html/"+str(repo)+"/repo.json"
     # Check for the repo.srf file, and print the right error message.
     if !(os.path.isfile(checkfile)):
         # Print error message if repo.json doesn't exist.
         slackreply(("There was a problem building "+repo+"repository. @volc should check the console output."))
+        return None
+    slackreply("Built "+str(repo)+" repo.")
     return None
+
+#############################################
+####  PRINTS MODS IN GIVEN REPO IN SLACK ####
+#############################################
+
+def showmods(repo):
+    '''Formats and prints repository information to slack'''
+    # Check which repo file is to be used and sanity checks it.
+    if repochecker() == False:
+        slackreply("Parker, that repository doesn't exist, so I can't show you it.")
+        return None
+
+    repojson=True
+    repomods=""
+    for r in repoparams:
+        if r["name"]==repo:
+            with open('/repository/storage/'+str(repo)+'repo.json') as data_file:
+            repojson = json.load(data_file)
+    for x in repojson["requiredMods"]:
+        repomods=str(repomods)+str((x["modName"]))+";"
+
+    slackreply("The mods in the "+str(repo)+" repo are: "+str(repomods))
 
 #############################################
 #### CHECKS FOR REPO AND RETURNS BOOLEAN ####
@@ -112,6 +137,7 @@ def modlinemanage(operation, mod, repo):
         repojson["requiredMods"].append({"modName":mod,"Enabled":True}
         with open('/repository/storage/'+str(repo)+'repo.json', 'w') as outfile:
             json.dump(repojson, outfile, indent=4)
+        slackreply("Parker, I've added")
         return None
 
     if operation=="remove":
