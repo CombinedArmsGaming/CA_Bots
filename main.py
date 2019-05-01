@@ -26,7 +26,7 @@ from datetime import datetime
 import requests
 from discord import post_discord, get_discord
 from reddit import post_reddit, eventposthandle
-from repo import repobuilder, modlinemanage, showmanage
+from repo import repobuilder, modlinemanage
 from globalvar import helpfile, discordchannels, redditevents, slack_client, AT_BOT, restarted, prefixes, subreddit, headers, slackreply
 
 #############################################
@@ -72,7 +72,7 @@ def handle_command(command, channel):
     elif command.startswith(prefixes["CHECK_COMMAND"]):
         msg = command.replace("show", "", 1)
         showcmd = msg.split(" ")
-        showmanage(str(showcmd[1]))
+        slackreply("Parker - this command hasn't been reimplemented, try again later.")
     elif command.startswith(prefixes["HELP_COMMAND"]):
         helpmsg = command[5:]
         helpcommand(helpmsg)

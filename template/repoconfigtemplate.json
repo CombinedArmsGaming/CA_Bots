@@ -1,17 +1,17 @@
 [
     {
         "name":"main",
-        "repofile":"",
-        "invfile":""
+        "repojson":"",
+        "repopng":""
     },
     {
         "name":"ww2",
-        "repofile":"",
-        "invfile":""
+        "repojson":"",
+        "repopng":""
     },
     {
         "name":"test",
-        "repofile":"",
-        "invfile":""
+        "repojson":"",
+        "repopng":""
     }
 ]
