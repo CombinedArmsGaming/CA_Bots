@@ -36,7 +36,7 @@ def confirmationmessage(repo):
     # Create repo.json file path identifier
     checkfile = "/var/www/html/"+str(repo)+"/repo.json"
     # Check for the repo.srf file, and print the right error message.
-    if !(os.path.isfile(checkfile)):
+    if not (os.path.isfile(checkfile)):
         # Print error message if repo.json doesn't exist.
         slackreply(("There was a problem building "+repo+"repository. @volc should check the console output."))
         return None
