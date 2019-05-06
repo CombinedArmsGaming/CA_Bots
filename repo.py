@@ -90,7 +90,7 @@ def modlinemanage(operation, mod, repo):
     for r in repoparams:
         if r["name"]==repo:
             with open('/repository/storage/'+str(repo)+'repo.json') as data_file:
-            repojson = json.load(data_file)
+                repojson = json.load(data_file)
 
     for x in repojson["requiredMods"]:
         repomods.append(x["modName"])
