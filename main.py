@@ -72,7 +72,7 @@ def handle_command(command, channel):
     elif command.startswith(prefixes["CHECK_COMMAND"]):
         msg = command.replace("show", "", 1)
         showcmd = msg.split(" ")
-        showmods(showcmd)
+        showmods(showcmd[1])
     elif command.startswith(prefixes["HELP_COMMAND"]):
         helpmsg = command[5:]
         helpcommand(helpmsg)

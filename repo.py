@@ -8,6 +8,7 @@
 from __future__ import absolute_import
 import os
 import subprocess
+import json
 from globalvar import slackreply, botparams, repoparams
 
 #############################################
@@ -19,8 +20,8 @@ def repobuilder():
     # Sanitise action and print beginning message.
     slackreply(("This is Eagle-Six to all units. Message received, build all repositories in succession, over."))
     for r in repoparams:
-        showmods(str(r["name"])
-        subprocess.call("r3pogen.sh "+str(r["name"]), shell=True)
+        showmods(str(r["name"]))
+        subprocess.call("/slackbot/r3pogen.sh "+str(r["name"]), shell=True)
         confirmationmessage(str(r["name"]))
     # Print confirmation message.
     slackreply(("Eagle-Six to @volc and @klima. Repositories built. Eagle-Six out."))
@@ -36,7 +37,7 @@ def confirmationmessage(repo):
     # Create repo.json file path identifier
     checkfile = "/var/www/html/"+str(repo)+"/repo.json"
     # Check for the repo.srf file, and print the right error message.
-    if !(os.path.isfile(checkfile)):
+    if not (os.path.isfile(checkfile)):
         # Print error message if repo.json doesn't exist.
         slackreply(("There was a problem building "+repo+"repository. @volc should check the console output."))
         return None
@@ -50,7 +51,7 @@ def confirmationmessage(repo):
 def showmods(repo):
     '''Formats and prints repository information to slack'''
     # Check which repo file is to be used and sanity checks it.
-    if repochecker() == False:
+    if repochecker(repo) == False:
         slackreply("Parker, that repository doesn't exist, so I can't show you it.")
         return None
 
@@ -59,11 +60,11 @@ def showmods(repo):
     for r in repoparams:
         if r["name"]==repo:
             with open('/repository/storage/'+str(repo)+'repo.json') as data_file:
-            repojson = json.load(data_file)
+                repojson = json.load(data_file)
     for x in repojson["requiredMods"]:
         repomods=str(repomods)+str((x["modName"]))+";"
 
-    slackreply("The mods in the "+str(repo)+" repo are: "+str(repomods))
+    slackreply("The "+str(len(repojson["requiredMods"]))+" mods in the "+str(repo)+" repo are: "+str(repomods))
 
 #############################################
 #### CHECKS FOR REPO AND RETURNS BOOLEAN ####
@@ -72,9 +73,8 @@ def showmods(repo):
 def repochecker(repo):
     '''Checks if a repository exists and returns the locations of the relevant config files'''
     for r in repoparams:
-        if r["name"]==repo:
+        if str(r["name"])==str(repo):
             return True
-    print("Parker, that repository wasn't recognised. Try again, over.")
     return False
 
 #############################################
@@ -90,7 +90,7 @@ def modlinemanage(operation, mod, repo):
     for r in repoparams:
         if r["name"]==repo:
             with open('/repository/storage/'+str(repo)+'repo.json') as data_file:
-            repojson = json.load(data_file)
+                repojson = json.load(data_file)
 
     for x in repojson["requiredMods"]:
         repomods.append(x["modName"])
@@ -134,17 +134,18 @@ def modlinemanage(operation, mod, repo):
     #############################################
 
     if operation=="add":
-        repojson["requiredMods"].append({"modName":mod,"Enabled":True}
+        repojson["requiredMods"].append({"modName":mod,"Enabled":True})
         with open('/repository/storage/'+str(repo)+'repo.json', 'w') as outfile:
             json.dump(repojson, outfile, indent=4)
-        slackreply("Parker, I've added")
+        slackreply("Parker, I've added "+str(mod)+" to the "+str(repo)+" repo.")
         return None
 
     if operation=="remove":
         for i in repojson["requiredMods"]:
-            if i["modName"] == mod:
+            if str(i["modName"]) ==str(mod):
                 repojson["requiredMods"].remove(i)
                 break
-        with open('testrepo.json', 'w') as outfile:
+        with open('/repository/storage/'+str(repo)+'repo.json', 'w') as outfile:
             json.dump(repojson, outfile, indent=4)
+        slackreply("Parker, I've removed "+str(mod)+" from the "+str(repo)+" repo.")
         return None
