@@ -134,7 +134,7 @@ def modlinemanage(operation, mod, repo):
     #############################################
 
     if operation=="add":
-        repojson["requiredMods"].append({"modName":mod,"Enabled":True}
+        repojson["requiredMods"].append({"modName":mod,"Enabled":True})
         with open('/repository/storage/'+str(repo)+'repo.json', 'w') as outfile:
             json.dump(repojson, outfile, indent=4)
         slackreply("Parker, I've added")
