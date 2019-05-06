@@ -19,7 +19,7 @@ def repobuilder():
     # Sanitise action and print beginning message.
     slackreply(("This is Eagle-Six to all units. Message received, build all repositories in succession, over."))
     for r in repoparams:
-        showmods(str(r["name"])
+        showmods(str(r["name"]))
         subprocess.call("r3pogen.sh "+str(r["name"]), shell=True)
         confirmationmessage(str(r["name"]))
     # Print confirmation message.
