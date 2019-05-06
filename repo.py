@@ -8,6 +8,7 @@
 from __future__ import absolute_import
 import os
 import subprocess
+import json
 from globalvar import slackreply, botparams, repoparams
 
 #############################################
@@ -50,7 +51,7 @@ def confirmationmessage(repo):
 def showmods(repo):
     '''Formats and prints repository information to slack'''
     # Check which repo file is to be used and sanity checks it.
-    if repochecker() == False:
+    if repochecker(repo) == False:
         slackreply("Parker, that repository doesn't exist, so I can't show you it.")
         return None
 
