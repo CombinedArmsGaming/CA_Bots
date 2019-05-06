@@ -20,7 +20,7 @@ def repobuilder():
     slackreply(("This is Eagle-Six to all units. Message received, build all repositories in succession, over."))
     for r in repoparams:
         showmods(str(r["name"])
-        subprocess.call("r3pogen.sh "+str(r["name"])), shell=True)
+        subprocess.call("r3pogen.sh "+str(r["name"]), shell=True)
         confirmationmessage(str(r["name"]))
     # Print confirmation message.
     slackreply(("Eagle-Six to @volc and @klima. Repositories built. Eagle-Six out."))
