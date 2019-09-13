@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VER INFO IN MAIN.PY 25/2/2018  ######
+######  VER INFO IN MAIN.PY 13/9/2019  ######
 
 '''This module contains all the repository management functions'''
 
@@ -22,9 +22,13 @@ def repobuilder():
     for r in repoparams:
         showmods(str(r["name"]))
         subprocess.call("/slackbot/r3pogen.sh "+str(r["name"]), shell=True)
-        confirmationmessage(str(r["name"]))
+        buildbool = True
+        buildbool = confirmationmessage(str(r["name"]))
+        if (buildbool == False):
+            slackreply("Eagle-Six here, tactical aid is required, the repository did not build correctly. Ending operation.")
+            break
     # Print confirmation message.
-    slackreply(("Eagle-Six to @volc and @klima. Repositories built. Eagle-Six out."))
+    slackreply("Eagle-Six to @volc and @klima. Repositories built. Eagle-Six out.")
 
 #############################################
 ####  GENS ERROR MESSAGES AS REPO GENS   ####
@@ -40,9 +44,9 @@ def confirmationmessage(repo):
     if not (os.path.isfile(checkfile)):
         # Print error message if repo.json doesn't exist.
         slackreply(("There was a problem building "+repo+"repository. @volc should check the console output."))
-        return None
+        return False
     slackreply("Built "+str(repo)+" repo.")
-    return None
+    return True
 
 #############################################
 ####  PRINTS MODS IN GIVEN REPO IN SLACK ####
