@@ -50,5 +50,9 @@
     "show":{
         "name":"show",
         "helptext":"Usage: show [repo]\nSawyer will print a list of all the mods currently in a given repository."
+    },
+    "single":{
+        "name":"single",
+        "helptext":"Usage: single [repo]\nSawyer will check the existance of, and silently build a single repository."
     }
 }]
