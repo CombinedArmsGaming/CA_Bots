@@ -29,6 +29,22 @@ def repobuilder():
             break
     # Print confirmation message.
     slackreply("Eagle-Six to @volc and @klima. Repositories built. Eagle-Six out.")
+    
+def reposingle(reponame):
+    '''This function handles the repository construction'''
+    # Sanitise action and print beginning message.
+    slackreply(("This is Eagle-Six to all units. Message received, build a single repository, over."))
+    for r in repoparams:
+        if str(r["name"]) == str(reponame):
+            showmods(str(r["name"]))
+            subprocess.call("/slackbot/r3pogen.sh "+str(r["name"]), shell=True)
+            buildbool = True
+            buildbool = confirmationmessage(str(r["name"]))
+            if (buildbool == False):
+                slackreply("Eagle-Six here, tactical aid is required, the repository did not build correctly. Ending operation.")
+                break
+    # Print confirmation message.
+    slackreply("Eagle-Six to @volc and @klima. Repository built. Eagle-Six out.")
 
 #############################################
 ####  GENS ERROR MESSAGES AS REPO GENS   ####
