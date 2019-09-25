@@ -93,6 +93,10 @@ def handle_command(command, channel):
         post_discord("announcements", "@everyone repositories have been updated.")
     elif command.startswith(prefixes["SBUILD_COMMAND"]):
         repobuilder()
+    elif command.startswith(prefixes["SINGLEBUILD_COMMAND"]):
+        msg = command.replace("single", "", 1)
+        showcmd = msg.split(" ")
+        reposingle(str(showcmd[1]))
     else:
         slackreply("I need more information to allocate additional fire support Parker, try the help command if you need to call for additional support.")
 
