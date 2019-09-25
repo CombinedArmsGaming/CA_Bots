@@ -64,6 +64,7 @@ prefixes = {# Commands relating to testing/presence
     "SBUILD_COMMAND":"stealth build",
     "MODLINE_COMMAND":"modline",
     "CHECK_COMMAND":"show",
+    "SINGLEBUILD_COMMAND":"single",
     # Development Command
     "DEV_COMMAND":"dev"}
 
