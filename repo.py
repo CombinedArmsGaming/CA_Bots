@@ -10,12 +10,13 @@ import os
 import subprocess
 import json
 from globalvar import slackreply, botparams, repoparams
+from discord import post_discord
 
 #############################################
 #### REPOSITORY CONSTRUCTOR              ####
 #############################################
 
-def repobuilder():
+def repobuilder(stealthbool):
     '''This function handles the repository construction'''
     # Sanitise action and print beginning message.
     slackreply(("This is Eagle-Six to all units. Message received, build all repositories in succession, over."))
@@ -29,6 +30,8 @@ def repobuilder():
             break
     # Print confirmation message.
     slackreply("Eagle-Six to @volc and @klima. Repositories built. Eagle-Six out.")
+    if (stealthbool == True):
+        post_discord("announcements", "@everyone repositories have been updated.")
     
 def reposingle(reponame):
     '''This function handles the repository construction'''
