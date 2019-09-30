@@ -89,10 +89,9 @@ def handle_command(command, channel):
         post_discord("announcements", "@everyone repositories have been taken down for update.")
     elif command.startswith(prefixes["BUILD_COMMAND"]):
         post_discord("announcements", "Repositories have been taken down for update.")
-        repobuilder()
-        post_discord("announcements", "@everyone repositories have been updated.")
+        repobuilder(True)
     elif command.startswith(prefixes["SBUILD_COMMAND"]):
-        repobuilder()
+        repobuilder(False)
     elif command.startswith(prefixes["SINGLEBUILD_COMMAND"]):
         msg = command.replace("single", "", 1)
         showcmd = msg.split(" ")
