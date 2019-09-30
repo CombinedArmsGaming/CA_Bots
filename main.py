@@ -26,7 +26,7 @@ from datetime import datetime
 import requests
 from discord import post_discord, get_discord
 from reddit import post_reddit, eventposthandle
-from repo import repobuilder, modlinemanage, showmods
+from repo import repobuilder, modlinemanage, showmods, reposingle
 from globalvar import helpfile, discordchannels, redditevents, slack_client, AT_BOT, restarted, prefixes, subreddit, headers, slackreply
 
 #############################################
