@@ -59,6 +59,8 @@ def handle_command(command, channel):
         slackreply("This is Eagle-Six. What do you need?")
     elif command.startswith(prefixes["DEV_COMMAND"]):
         slackreply("This is Eagle-Six. Developer command received.")
+        postdate = datetime.strptime(redditevents[0]["event-datetime"], '%Y-%m-%d %H:%M:%S')
+        post_discord("aar",("~~-                                                                   -~~\n**"+redditevents[0]["event-title"]+"**\n**"+str(postdate)+"**\n~~-                                                                   -~~"))
     elif command.startswith(prefixes["DISCORD_COMMAND"]):
         msg = command.replace("discordpost", " ", 1)
         msgsplit = msg.split(" ")
