@@ -180,7 +180,8 @@ if __name__ == "__main__":
                                 with open(os.getcwd()+'/config/redditevents.json', 'w') as outfile:
                                     json.dump(redditevents, outfile, indent=4)
                                 r = requests.delete('https://discordapp.com/api/channels/'+discordchannels["events"]+'/messages/'+item["id"], headers=headers)
-                                post_reddit(post="aar", eventtitle=post["event-title"])
+                                #post_reddit(post="aar", eventtitle=post["event-title"])
+                                post_discord("aar",("~~-                                                                   -~~\n**"+post["event-title"]+"**\n**"+str(postdate)+"**\n~~-                                                                   -~~"))
                                 with open(os.getcwd()+'/config/redditevents.json') as json_file:
                                     redditevents = json.load(json_file)
             except Exception as e:
