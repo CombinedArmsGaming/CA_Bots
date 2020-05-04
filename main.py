@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 2.0.0   25/02/2018     ######
+######  VERSION 2.1.0   04/05/2020     ######
 
 """
     QUICK GLOSSARY
@@ -60,7 +60,7 @@ def handle_command(command, channel):
     elif command.startswith(prefixes["DEV_COMMAND"]):
         slackreply("This is Eagle-Six. Developer command received.")
         postdate = datetime.strptime(redditevents[0]["event-datetime"], '%Y-%m-%d %H:%M:%S')
-        post_discord("aar",("~~-                                                                   -~~\n**"+redditevents[0]["event-title"]+"**\n**"+str(postdate)+"**\n~~-                                                                   -~~"))
+        post_discord("aar",("~~-                                                                   -~~\n**"+redditevents[0]["event-title"]+"**\n**"+str(postdate)+"**\n"+post["event-url"]+"\n~~-                                                                   -~~"))
     elif command.startswith(prefixes["DISCORD_COMMAND"]):
         msg = command.replace("discordpost", " ", 1)
         msgsplit = msg.split(" ")
@@ -183,7 +183,7 @@ if __name__ == "__main__":
                                     json.dump(redditevents, outfile, indent=4)
                                 r = requests.delete('https://discordapp.com/api/channels/'+discordchannels["events"]+'/messages/'+item["id"], headers=headers)
                                 #post_reddit(post="aar", eventtitle=post["event-title"])
-                                post_discord("aar",("~~-                                                                   -~~\n**"+post["event-title"]+"**\n**"+str(postdate)+"**\n~~-                                                                   -~~"))
+                                post_discord("aar",("~~-                                                                   -~~\n**"+post["event-title"]+"**\n**"+str(postdate)+"**\n"+post["event-url"]+"\n~~-                                                                   -~~"))
                                 with open(os.getcwd()+'/config/redditevents.json') as json_file:
                                     redditevents = json.load(json_file)
             except Exception as e:
