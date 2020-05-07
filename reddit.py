@@ -115,6 +115,6 @@ def eventposthandle(submission):
     postdate = postdate.replace(hour=postdate.hour)
     if (postdictionary not in redditevents) and (postdate > nowdate):
         redditevents.append(postdictionary)
-        post_discord("events", postdictionary["event-url"])
+        post_discord("events",("~~-                                                                   -~~\n**"+postdictionary["event-title"].upper()+"**\n**"+str(postdate)+"**\n"+postdictionary["event-url"]+"\n~~-                                                                   -~~"))
     with open(os.getcwd()+'/config/redditevents.json', 'w') as outfile:
         json.dump(redditevents, outfile, indent=4)
