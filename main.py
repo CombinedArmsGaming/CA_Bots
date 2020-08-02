@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VERSION 2.1.0   04/05/2020     ######
+######  VERSION 2.1.0   02/08/2020     ######
 
 """
     QUICK GLOSSARY

@@ -9,8 +9,7 @@ from __future__ import absolute_import
 import json
 import socket
 import pickle
-from globalvar import redditposts, reddit, redditevents, hcdetails
-from discord import post_discord
+from globalvar import hcdetails
 
 #############################################
 #### REDDIT POST MAKER                   ####

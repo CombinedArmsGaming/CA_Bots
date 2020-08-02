@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VER INFO IN MAIN.PY 25/2/2018  ######
+######  VER INFO IN MAIN.PY 02/8/2020  ######
 
 '''All the functions for Colonel Sawyer relating to the Discord integration'''
 

@@ -1,7 +1,7 @@
 ######  SLACKBOT FOR COMBINED ARMS     ######
 ######  DEV: CALUM CAMERON BROOKES     ######
 ######  CALUM.C.BROOKES@GMAIL.COM      ######
-######  VER INFO IN MAIN.PY 13/9/2019  ######
+######  VER INFO IN MAIN.PY 02/8/2020  ######
 
 '''This module contains all the repository management functions'''
 
