@@ -88,6 +88,12 @@ headers = {"Authorization":botparams["discord-token"],
            "Content-Type":"application/json"}
 
 #############################################
+#### HC IP CONFIG DETAILS                ####
+#############################################
+
+hcdetails = {"hcip":botparams["hcip"],"hcport":botparams[hcport]}
+
+#############################################
 #### SLACK MESSAGE SENDER                ####
 #############################################
 
