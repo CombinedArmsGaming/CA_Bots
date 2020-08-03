@@ -26,8 +26,9 @@ from datetime import datetime
 import requests
 from discord import post_discord, get_discord
 from reddit import post_reddit, eventposthandle
-from repo import repobuilder, modlinemanage, showmods, reposingle
+from repo import repobuilder, modlinemanage, showmods, reposingle, hcupdater
 from globalvar import helpfile, discordchannels, redditevents, slack_client, AT_BOT, restarted, prefixes, subreddit, headers, slackreply
+from hcsocket import sendtohc
 
 #############################################
 #### LOGGING CONFIGURATION               ####
@@ -98,6 +99,20 @@ def handle_command(command, channel):
         msg = command.replace("single", "", 1)
         showcmd = msg.split(" ")
         reposingle(str(showcmd[1]))
+    elif command.startswith(prefixes["HCUPDATE_COMMAND"]):
+        msg = command.replace("hcupdate", "", 1)
+        hcupdatemsg = msg.split(" ")
+        hcupdater(str(hcupdatemsg[1]))
+    elif command.startswith(prefixes["HCKILL_COMMAND"]):
+        hcresponse = sendtohc(command="kill")
+    elif command.startswith(prefixes["HCQUERY_COMMAND"]):
+        hcresponse = sendtohc(command="query")
+    elif command.startswith(prefixes["HCSTART_COMMAND"]):
+        msg = command.replace("hcstart", "", 1)
+        hcstart = msg.split(" ")
+        hcresponse = sendtohc(str(hcstartcmd[1]))
+    elif command.startswith(prefixes["HCRADIOCHECK_COMMAND"]):
+        hcresponse = sendtohc(command="radiocheck")
     else:
         slackreply("I need more information to allocate additional fire support Parker, try the help command if you need to call for additional support.")
 

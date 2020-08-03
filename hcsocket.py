@@ -15,7 +15,7 @@ from globalvar import hcdetails
 #### REDDIT POST MAKER                   ####
 #############################################
 
-def sendtohcserver(command="radiocheck",repo="",payload=""):
+def sendtohc(command="radiocheck",repo="",payload=""):
 
     '''This code communicates with the HC server and returns the reponses'''
 

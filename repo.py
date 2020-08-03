@@ -11,6 +11,21 @@ import subprocess
 import json
 from globalvar import slackreply, botparams, repoparams
 from discord import post_discord
+from hcsocket import sendtohc
+
+#############################################
+#### UPDATES THE HC MODLINES             ####
+#############################################
+
+def hcupdater(repo1):
+    '''Contacts the HC and updates the repo.'''
+    for r in repoparams:
+        if r["name"]==repo:
+            with open('/repository/storage/'+str(repo)+'repo.json') as data_file:
+                repojson = json.load(data_file)
+    for x in repojson["requiredMods"]:
+        repomods=str(repomods)+str((x["modName"]))+";"
+    sendtohc(command="update",repo=repo1,payload=str(repomods))
 
 #############################################
 #### REPOSITORY CONSTRUCTOR              ####
@@ -25,6 +40,7 @@ def repobuilder(stealthbool):
         subprocess.call("/slackbot/r3pogen.sh "+str(r["name"]), shell=True)
         buildbool = True
         buildbool = confirmationmessage(str(r["name"]))
+        hcupdater(str(r["name"]).upper())
         if (buildbool == False):
             slackreply("Eagle-Six here, tactical aid is required, the repository did not build correctly. Ending operation.")
             break

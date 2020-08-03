@@ -54,5 +54,25 @@
     "single":{
         "name":"single",
         "helptext":"Usage: single [repo]\nSawyer will check the existance of, and silently build a single repository."
+    },
+    "hcstart":{
+        "name":"hcstart",
+        "helptext":"Usage: hcstart [repo]\nSawyer will start the headless clients using the given repo."
+    },
+    "hckill":{
+        "name":"hckill",
+        "helptext":"Usage: hckill\nSawyer will kill the headless clients and report back."
+    },
+    "hcquery":{
+        "name":"hcquery",
+        "helptext":"Usage: hcquery\nSawyer will check for headless client statsus and report back."
+    },
+    "hcradiocheck":{
+        "name":"hcradiocheck",
+        "helptext":"Usage: hcradiocheck\nSawyer will check he can speak to the HC server and report back."
+    },
+    "hcupdate":{
+        "name":"hcupdate",
+        "helptext":"Usage: hcupdate [repo]\nSawyer will send the latest version of the modline to the HC server for that specific repo.\nSawyer does this automatically when executing any repo build command."
     }
 }]

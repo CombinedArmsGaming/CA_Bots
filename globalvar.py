@@ -65,6 +65,12 @@ prefixes = {# Commands relating to testing/presence
     "MODLINE_COMMAND":"modline",
     "CHECK_COMMAND":"show",
     "SINGLEBUILD_COMMAND":"single",
+    # Commands relating to HC management
+    "HCSTART_COMMAND":"hcstart",
+    "HCRADIOCHECK_COMMAND":"hcradiocheck",
+    "HCKILL_COMMAND":"hckill",
+    "HCQUERY_COMMAND":"hcquery",
+    "HCUPDATE_COMMAND":"hcupdate",
     # Development Command
     "DEV_COMMAND":"dev"}
 
