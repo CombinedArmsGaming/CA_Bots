@@ -102,17 +102,49 @@ def handle_command(command, channel):
     elif command.startswith(prefixes["HCUPDATE_COMMAND"]):
         msg = command.replace("hcupdate", "", 1)
         hcupdatemsg = msg.split(" ")
-        hcupdater(str(hcupdatemsg[1]))
+        hcresponse = hcupdater(str(hcupdatemsg[1]))
+        if ((hcresponse[1]["success"]) and (hcresponse[1]["command"] == "update")):
+            slackreply("Headless Client reports repo parameters updated successfully.")
+        elif (hcreponse == None):
+            slackreply("No response from telemetry unit.")
+        else:
+            slackreply("Faulty response from telemetry unit.")
     elif command.startswith(prefixes["HCKILL_COMMAND"]):
         hcresponse = sendtohc(command="kill")
+        if ((hcresponse[1]["success"]) and (hcresponse[1]["command"] == "kill")):
+            slackreply("Headless Clients successfully killed")
+        elif (hcreponse == None):
+            slackreply ("No response from HC server.")
+        else:
+            slackreply("Headless Client kill not confirmed. Return from HC server reads: "+str(hcresponse))
     elif command.startswith(prefixes["HCQUERY_COMMAND"]):
         hcresponse = sendtohc(command="query")
+        if ((hcresponse[1]["success"]) and (hcresponse[1]["command"] == "query")):
+            slackreply("Headless Client processes are operating. This does not guarantee that the processes are running correctly.")
+        elif ((not(hcresponse[1]["success"])) and (hcresponse[1]["command"] == "query")):
+            slackreply("Headless Client processes are not operating.")
+        elif (hcreponse == None):
+            slackreply("No response from telemetry unit.")
+        else:
+            slackreply("Faulty response from telemetry unit.")
     elif command.startswith(prefixes["HCSTART_COMMAND"]):
         msg = command.replace("hcstart", "", 1)
-        hcstart = msg.split(" ")
-        hcresponse = sendtohc(str(hcstartcmd[1]))
+        hcstartcmd = msg.split(" ")
+        hcresponse = sendtohc(command="run",repo=str(hcstartcmd[1]))
+        if ((hcresponse[1]["success"]) and (hcresponse[1]["command"] == "run")):
+            slackreply("Headless Client Server reports the clients have started.")
+        elif (hcreponse == None):
+            slackreply("No response from telemetry unit.")
+        else:
+            slackreply("Faulty response from telemetry unit.")
     elif command.startswith(prefixes["HCRADIOCHECK_COMMAND"]):
         hcresponse = sendtohc(command="radiocheck")
+        if ((hcresponse[1]["success"]) and (hcresponse[1]["command"] == "radiocheck")):
+            slackreply("Headless Client Server is responding to telemetry.")
+        elif (hcreponse == None):
+            slackreply("No response from telemetry unit.")
+        else:
+            slackreply("Faulty response from telemetry unit.")
     else:
         slackreply("I need more information to allocate additional fire support Parker, try the help command if you need to call for additional support.")
 

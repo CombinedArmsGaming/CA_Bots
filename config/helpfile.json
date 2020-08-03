@@ -5,7 +5,7 @@
     },
     "list":{
         "name":"list",
-        "helptext":"The commands available are:\nhelp\ncome in\nlist\ndiscordpost\nopen repo\nclose repo\nbuild repo\nsingle\nupdate repo\nstealth build\nstealth update\nmodline\nshow"
+        "helptext":"The commands available are:\nhelp\ncome in\nlist\ndiscordpost\nopen repo\nclose repo\nbuild repo\nsingle\nupdate repo\nstealth build\nstealth update\nmodline\nshow\nsingle\nhcstart\nhckill\nhcquery\nhcupdate\nhcradiocheck"
     },
     "come in":{
         "name":"come in",
