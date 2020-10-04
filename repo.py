@@ -42,9 +42,14 @@ def repobuilder(stealthbool):
         subprocess.call("/slackbot/r3pogen.sh "+str(r["name"]), shell=True)
         buildbool = True
         buildbool = confirmationmessage(str(r["name"]))
-        hcupdater(str(r["name"]))
         if (buildbool == False):
             slackreply("Eagle-Six here, tactical aid is required, the repository did not build correctly. Ending operation.")
+            break
+    for r in repoparams:
+        try:
+            hcupdater(str(r["name"]))
+        except:
+            slackreply("Eagle-Six here, tactical aid is required, cannot confirm HC received repo commandlines. Ending operation.")
             break
     # Print confirmation message.
     slackreply("Eagle-Six to @volc and @klima. Repositories built. Eagle-Six out.")
@@ -61,9 +66,15 @@ def reposingle(reponame):
             subprocess.call("/slackbot/r3pogen.sh "+str(r["name"]), shell=True)
             buildbool = True
             buildbool = confirmationmessage(str(r["name"]))
-            hcupdater(str(r["name"]))
             if (buildbool == False):
                 slackreply("Eagle-Six here, tactical aid is required, the repository did not build correctly. Ending operation.")
+                break
+    for r in repoparams:
+        if str(r["name"]) == str(reponame):
+            try:
+                hcupdater(str(r["name"]))
+            except:
+                slackreply("Eagle-Six here, tactical aid is required, cannot confirm HC received repo commandlines. Ending operation.")
                 break
     # Print confirmation message.
     slackreply("Eagle-Six to @volc and @klima. Repository built. Eagle-Six out.")
